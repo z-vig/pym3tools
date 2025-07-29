@@ -1,5 +1,0 @@
-numpy
-psutil
-matplotlib
-requests
-tqdm
