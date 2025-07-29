@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "m3py"
+description = """Data utilities for processing Moon Mineralogy Mapper Data from
+the NASA Planetary Data System."""
+authors = [
+    {name = "Zachary M. Vig", email = "zvig@umd.edu"}
+]
+keywords = ["hyperspectral", "processing", "spectral cube", "image", "M3"]
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy",
+    "psutil",
+    "matplotlib",
+    "requests",
+    "tqdm"
+]
+
+[tools.setuptools]
+package-dir = {"" = "src"}
+
+[tools.setuptools.packages.find]
+where = ["src"]
