@@ -2,13 +2,14 @@
 import os
 from pathlib import Path
 from time import sleep
+from typing import Mapping
 
 # Dependencies
 import requests
 from tqdm import tqdm
 
 
-def retrieve_urls(url_dict: dict[str, str | os.PathLike]):
+def retrieve_urls(url_dict: Mapping[str, str | os.PathLike]):
     """
     Retrieves data from PDS URLs.
 

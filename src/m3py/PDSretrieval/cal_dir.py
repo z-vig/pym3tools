@@ -9,7 +9,12 @@ from .retrieve_urls import retrieve_urls
 
 
 class CalDir:
-    def __init__(self, parent: os.PathLike, data_id: str):
+    def __init__(
+        self,
+        parent: os.PathLike,
+        data_id: str,
+        verbose: bool = False
+    ):
         self.root = Path(parent)
         self.retrieval = Path(self.root, f"{data_id}_urls.txt")
         self.acq_type = re.findall(FileRetrievalPatterns.acq_type, data_id)[0]
@@ -43,7 +48,9 @@ class CalDir:
             if not Path(self.root, Path(i).name).is_file()
         }  # This contains only files that do not exist yet.
 
-        print(f"{len(file_path_dict)} calibration files will be downloaded.")
+        if verbose:
+            print(f"{len(file_path_dict)} calibration files will be"
+                  "downloaded.")
         retrieve_urls(file_path_dict)
 
     def __str__(self):

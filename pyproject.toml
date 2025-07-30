@@ -18,11 +18,15 @@ dependencies = [
     "psutil",
     "matplotlib",
     "requests",
-    "tqdm"
+    "tqdm",
+    "h5py"
 ]
 
 [tools.setuptools]
 package-dir = {"" = "src"}
+
+[tools.setuptools.package-data]
+"m3py.selenography" = ["data/*.txt"]
 
 [tools.setuptools.packages.find]
 where = ["src"]

@@ -11,6 +11,12 @@ from .file_retrieval_patterns import FileRetrievalPatterns
 
 
 class M3FileConfig:
+    root: os.PathLike
+    data_ID_long: str
+    data_ID: str
+    acq_type: str
+    pds_dir: PDSDir
+    cal_dir: CalDir
     """
     Stores data for M3 file locations for a single M3 stripe.
 
@@ -44,7 +50,7 @@ class M3FileConfig:
         self.cal_dir = CalDir(Path(self.root, "cal_data"), self.data_ID_long)
 
     def _initialize_directories(self, urls_file: os.PathLike):
-        self.root.mkdir()
+        Path(self.root).mkdir()
 
         dir_names = [
             "pds_data",
@@ -66,8 +72,8 @@ class M3FileConfig:
         )
 
     def _validate(self):
-        if not self.root.is_dir():
-            self.root.mkdir()
+        if not Path(self.root).is_dir():
+            Path(self.root).mkdir()
 
     def __str__(self):
         tree_string = (

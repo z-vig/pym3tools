@@ -8,23 +8,27 @@ from dataclasses import dataclass, field
 from .retrieve_urls import retrieve_urls
 from .file_retrieval_patterns import FileRetrievalPatterns
 
+type pathlike = str | os.PathLike
+
 
 @dataclass
 class PDSDataFiles():
-    root: os.PathLike
-    lbl: os.PathLike
+    root: pathlike
+    lbl: pathlike
     level: int = field(init=False)
 
     def __post_init__(self):
+        self.root = Path(self.root)
+        self.lbl = Path(self.lbl)
         if not self.root.is_dir():
             print(f"Creating L{self.level} directory.")
             self.root.mkdir()
         if self.level not in (0, 1, 2):
             raise ValueError(f"{self.level} is not a valid processing level.")
 
-    def __str__(self):
+    def __str__(self) -> str:
         tree_string = (
-            f"{self.root.name}\n"
+            f"{Path(self.root).name}\n"
         )
         n = 1
         for k, v in vars(self).items():
@@ -75,7 +79,18 @@ class L2Files(PDSDataFiles):
 
 
 class PDSDir:
-    def __init__(self, parent: os.PathLike, data_id: str):
+    root: os.PathLike
+    retrieval: os.PathLike
+    l0: L0Files
+    l1: L1Files
+    l2: L2Files
+
+    def __init__(
+        self,
+        parent: os.PathLike,
+        data_id: str,
+        verbose: bool = False
+    ):
         self.root = Path(parent)
         self.retrieval = Path(self.root, f"{data_id}_urls.txt")
 
@@ -110,12 +125,13 @@ class PDSDir:
                 if not Path(save_dir, Path(i).name).is_file()
             }  # This contains only files that do not exist yet.
 
-            print(f"{len(file_path_dict)} {lbl} Files will be downloaded.")
+            if verbose:
+                print(f"{len(file_path_dict)} {lbl} Files will be downloaded.")
             retrieve_urls(file_path_dict)
 
     def __str__(self):
         tree_string = (
-            f"{self.root.name}\n"
+            f"{Path(self.root).name}\n"
         )
         for k, v in vars(self).items():
             if k not in ("root"):

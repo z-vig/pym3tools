@@ -2,12 +2,16 @@
 from dataclasses import dataclass
 from pathlib import Path
 import os
+from typing import Optional
 
 # Top-Level Imports
 from m3py.PDSretrieval import M3FileConfig
+from m3py.constants import M3DataFormat
 
 # Dependencies
 import numpy as np
+
+type pathlike = str | os.PathLike
 
 
 @dataclass
@@ -16,16 +20,6 @@ class Window:
     Class for keeping track of window information for image viewing.
     The user will specify the bottom left row (X) and column (Y) of the window
     as well as the width and height as shown below:
-    <pre>
-           W
-        ┌─────┐
-        │     │
-        │     │
-        │     │ H
-        │     │
-        |     │
-      (X,Y)───┘
-    </pre>
     """
     X: int
     Y: int
@@ -35,16 +29,16 @@ class Window:
 
 def read_m3(
     img_path: str | os.PathLike,
-    data_format: dict[str, dict[str, str | int]],
+    data_format: M3DataFormat,
     acq_type: str,
-    window: Window = None,
+    window: Optional[Window] = None,
 ):
     img_path = Path(img_path)
 
-    nbands = data_format[acq_type]["nbands"]
-    ncols = data_format[acq_type]["ncols"]
-    dtype = data_format[acq_type]["dtype"]
-    hdrlen = data_format[acq_type]["header_length"]
+    nbands = getattr(data_format, acq_type).nbands
+    ncols = getattr(data_format, acq_type).ncols
+    dtype = getattr(data_format, acq_type).dtype
+    hdrlen = getattr(data_format, acq_type).header_length
 
     if dtype == "<d":
         nbytes = 64 // 8
@@ -105,8 +99,8 @@ def read_m3(
 
 def get_wavelengths(
     file_config: M3FileConfig | None = None,
-    rfl_hdr: str | os.PathLike | None = None,
-    acq_type: str = None
+    rfl_hdr: Optional[pathlike] = None,
+    acq_type: Optional[str] = None
 ):
     """
     Returns a list of wavelengths from reflectance header file.
@@ -121,19 +115,29 @@ def get_wavelengths(
         Either `"global"` or `"targeted"`.
 
     """
+    # print(file_config.acq_type)
     if file_config is not None:
-        rfl_hdr = file_config.pds_dir.l2.rfl_hdr
-        acq_type = file_config.acq_type
+        rfl_hdr_path = file_config.pds_dir.l2.rfl_hdr
+        acq = file_config.acq_type
+    else:
+        if rfl_hdr is None or acq_type is None:
+            raise ValueError("Must provide both rfl_hdr and acq_type if no"
+                             "file_config.")
+        rfl_hdr_path = Path(rfl_hdr)
+        acq = acq_type
 
-    if acq_type == 'global':
+        assert isinstance(rfl_hdr_path, Path)
+        assert acq in ("global", "targeted")
+
+    if acq == 'global':
         loc_key = "wavelength = {"
-    elif acq_type == 'targeted':
+    elif acq == 'targeted':
         loc_key = "target wavelengths = {"
     else:
-        raise ValueError(f"{acq_type} is an invalid acq_type. Must be"
+        raise ValueError(f"{acq} is an invalid acq_type. Must be "
                          "either global or targeted.")
 
-    with open(rfl_hdr, "r") as f:
+    with open(rfl_hdr_path, "r") as f:
         fread = f.read()
         idx_start = fread.find(loc_key)
         idx_end = fread.find("}", idx_start)
