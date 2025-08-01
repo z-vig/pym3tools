@@ -15,8 +15,13 @@ commands to install it mannually:
 ~~~
 """
 
-from .polar_crop import polar_crop
+from .crop import polar_crop
+from .gcp_utils import apply_gcps
+from .gcp_loaders import load_gcps, read_gcps_header
 
 __all__ = [
-    "polar_crop"
+    "polar_crop",
+    "apply_gcps",
+    "load_gcps",
+    "read_gcps_header"
 ]

@@ -2,6 +2,7 @@
 
 # Dependencies
 import numpy as np
+from rasterio.coords import BoundingBox
 
 
 def find_furthest_idx(
@@ -63,3 +64,24 @@ def polar_crop(
             raise IndexError("This image does not contain South Polar Data")
     else:
         raise ValueError(f"{cropping_type} is not a valid cropping type.")
+
+
+def regional_crop(
+    target_arr: np.ndarray,
+    loc_arr: np.ndarray,
+    bbox: BoundingBox
+) -> np.ndarray:
+    longitude_profile = np.mean(loc_arr[:, :, 0], axis=0)
+    latitude_profile = np.mean(loc_arr[:, :, 1], axis=1)
+
+    rows_in_bbox = np.where(
+        (longitude_profile > bbox.left) and longitude_profile < bbox.right
+    )[0]
+
+    cols_in_bbox = np.where(
+        (latitude_profile > bbox.bottom) and (latitude_profile < bbox.top)
+    )[0]
+
+    print(cols_in_bbox)
+
+    return rows_in_bbox
