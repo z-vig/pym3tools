@@ -11,6 +11,7 @@ from .crop import Crop
 from .georeference import Georeference
 from .terrain_model import TerrainModel
 from .solar_spectrum_reomval import SolarSpectrumRemoval
+from .statistical_polish import StatisticalPolish
 
 __all__ = [
     "Step",
@@ -18,5 +19,6 @@ __all__ = [
     "Georeference",
     "TerrainModel",
     "SolarSpectrumRemoval",
+    "StatisticalPolish",
     "M3Level2Pipeline"
 ]
