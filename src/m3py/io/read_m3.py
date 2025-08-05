@@ -2,10 +2,10 @@
 from dataclasses import dataclass
 from pathlib import Path
 import os
-from typing import Optional
+from typing import Optional, Sequence, Tuple, Mapping
 
 # Top-Level Imports
-from m3py.PDSretrieval import M3FileConfig
+from m3py.PDSretrieval import M3FileManager
 from m3py.constants import M3DataFormat
 
 # Dependencies
@@ -40,18 +40,15 @@ def read_m3(
     dtype = getattr(data_format, acq_type).dtype
     hdrlen = getattr(data_format, acq_type).header_length
 
-    if dtype == "<d":
-        nbytes = 64 // 8
-        numpy_dtype = np.float64
-    elif dtype == "<f":
-        nbytes = 32 // 8
-        numpy_dtype = np.float32
-    elif dtype == "<h":
-        nbytes = 16 // 8
-        numpy_dtype = np.int16
-    else:
-        numpy_dtype = None
-        raise ValueError(f"{dtype} is an invalid dtype.")
+    dtype_dict: Mapping[str, Tuple[type, int]] = {
+        "<d": (np.float64, 64//8),
+        "<f": (np.float32, 32//8),
+        "<h": (np.int16, 16//8)
+    }
+
+    numpy_dtype, nbytes = dtype_dict.get(dtype, (None, None))
+    if (numpy_dtype is None) or (nbytes is None):
+        raise ValueError(f"{dtype} is an invalid data type.")
 
     full_col_bytes = hdrlen + (ncols * nbands * nbytes)
 
@@ -75,7 +72,9 @@ def read_m3(
     elif xbounds_chk and ybounds_chk:
         raise ValueError("Window does not fit within either X or Y bounds.")
 
-    window_data = np.empty([window.H, window.W, nbands], dtype=numpy_dtype)
+    window_data: np.ndarray = np.empty(
+        [window.H, window.W, nbands], dtype=numpy_dtype
+    )
 
     with open(img_path, "rb") as f:
         byte_index = 0
@@ -98,16 +97,16 @@ def read_m3(
 
 
 def get_wavelengths(
-    file_config: M3FileConfig | None = None,
+    file_config: M3FileManager | None = None,
     rfl_hdr: Optional[pathlike] = None,
     acq_type: Optional[str] = None
-):
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns a list of wavelengths from reflectance header file.
 
     Parameters
     ----------
-    file_config: M3FileConfig
+    file_config: M3FileManager
         M3 File Config object.
     rfl_hdr: str | os.PathLike
         Path to reflectance header file.
@@ -115,7 +114,6 @@ def get_wavelengths(
         Either `"global"` or `"targeted"`.
 
     """
-    # print(file_config.acq_type)
     if file_config is not None:
         rfl_hdr_path = file_config.pds_dir.l2.rfl_hdr
         acq = file_config.acq_type
@@ -136,12 +134,21 @@ def get_wavelengths(
     else:
         raise ValueError(f"{acq} is an invalid acq_type. Must be "
                          "either global or targeted.")
+    bbl_key = "bbl = {"  # Band Bands List
+
+    def parse_list(
+        file_read: str,
+        start_string: str
+    ) -> Sequence[float | int]:
+        idx_start = file_read.find(start_string)
+        idx_end = file_read.find("}", idx_start)
+        str_list = file_read[idx_start:idx_end].split("\n")[1:]
+        num_list = [float(i.replace(" ", "").replace(",", ""))
+                    for i in str_list]
+        return num_list
 
     with open(rfl_hdr_path, "r") as f:
         fread = f.read()
-        idx_start = fread.find(loc_key)
-        idx_end = fread.find("}", idx_start)
-        str_list = fread[idx_start:idx_end].split("\n")[1:]
-        num_list = [float(i.replace(" ", "").replace(",", ""))
-                    for i in str_list]
-    return num_list
+        wavelengths = parse_list(fread, loc_key)
+        bbl = parse_list(fread, bbl_key)
+    return np.array(wavelengths, dtype=np.float32), np.array(bbl, dtype=bool)

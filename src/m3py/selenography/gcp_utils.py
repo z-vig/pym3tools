@@ -9,8 +9,8 @@ import subprocess
 # Dependencies
 import numpy as np
 # import rasterio as rio
-from rasterio.control import GroundControlPoint
-from rasterio.crs import CRS
+from rasterio.control import GroundControlPoint  # type: ignore
+from rasterio.crs import CRS  # type: ignore
 
 # Relative Imports
 from .gcp_loaders import load_gcps, read_gcps_header
@@ -21,21 +21,22 @@ from .numpy_to_gtiff import numpy_to_gtiff
 PathLike = str | os.PathLike | Path
 
 
-def apply_gcps_from_file(
+def _apply_gcps_from_file(
     arr: np.ndarray,
     gcp_file_path: PathLike,
     dst_path: PathLike,
-    arr_cropping: str = 'none',
-    input_array_offsets: Tuple[int, int] = (0, 0)
+    input_array_offsets: Tuple[int, int],
+    verbose: bool = False
 ) -> None:
     """
     Loads Ground Control Points from a *.gcps file and applies them to a numpy
     array. The GCPs in this file are assumed to be in the CGS_MOON_2000
-    coordinate reference system. Rather than applying GCPs and saving the full
-    extent of the input array as a GeoTiff, if any part of the input array
-    falls outside of the extent for which the gcps in the *.gcps file are valid
-    (as specified by the row/column offsets, width and height), the saved
-    GeoTiff will be a cropped version of the input array.
+    coordinate reference system. The loaded GCPs are in reference to a region
+    of the whole M3 stripe that is recorded by a row/column offset and a width/
+    height. These points are transformed to the region outline by the input
+    array using:
+
+    `new_gcp` = (`loaded_gcp` + `loaded_offset`) - `input_offset`
 
     Parameters
     ----------
@@ -46,22 +47,6 @@ def apply_gcps_from_file(
         create a *.gcps file see the `georeferencer` subpackage.
     dst_path: PathLike
         File path to save destination.
-    arr_cropping: str, optional
-        The pixel row/column coordinates in a *.gcps file are typically
-        obtained using a cropped version of a full M<sup>3</sup> strip. This
-        flag indicates the relationship between the input array and the array
-        used to perform the georeferencing. Options are:
-
-        - `'none'` (default): Assumes that arr is a full M<sup>3</sup> strip
-        and will add the row and column offsets to the pixel row/column coords.
-        - `'same'`: Assumes that arr is already cropped to the same extent as
-        the regional image used for georeferencing (i.e. where GCPs are valid)
-        and the full extent of the input array will be saved as a GeoTiff.
-        - `'different'`: Assumes that arr is cropped but to a different region
-        than the valid region of the GCPs. The resulting GeoTiff will be the
-        intersection of the input array and the valid GCP region. If this
-        option is chosen, `input_array_offsets` must be given.
-
     input_array_offsets: Tuple of 2 integers
         (row offset, column offset) for the input array from the full
         M<sup>3</sup> strip.
@@ -78,27 +63,40 @@ def apply_gcps_from_file(
     elif arr.ndim > 3:
         raise ValueError(f"{arr.ndim} dimensions is too big. Must be 2 or 3.")
 
-    if arr_cropping == 'none':
-        arr = arr[
-            gcp_meta.row_offset:gcp_meta.row_offset+gcp_meta.height,
-            gcp_meta.col_offset:gcp_meta.col_offset+gcp_meta.width,
-            :
-        ]
-    elif arr_cropping == 'same':
-        pass
-    elif arr_cropping == 'different':
-        raise NotImplementedError("Input array cannot be of a different"
-                                  "cropped region at this time.")
+    row_off, col_off = input_array_offsets
+    new_gcps = []
+    for i in gcps:
+        if i.row is None:
+            continue
+        if i.col is None:
+            continue
+
+        new_row = (i.row + gcp_meta.row_offset) - row_off
+        new_col = (i.col + gcp_meta.col_offset) - col_off
+
+        if (new_row > arr.shape[0]) or (new_row < 0):
+            continue
+
+        if (new_col > arr.shape[1]) or (new_col < 0):
+            continue
+
+        new_gcps.append(GroundControlPoint(
+            row=new_row,
+            col=new_col,
+            x=i.x,
+            y=i.y
+        ))
 
     tempfile = numpy_to_gtiff(arr, crs)
-    warp_to_gcps(tempfile, gcps, dst_path=dst_path)
+    warp_to_gcps(tempfile, new_gcps, dst_path=dst_path)
     os.remove(tempfile)
 
 
-def apply_gcps_from_geolocation_array(
+def _apply_gcps_from_geolocation_array(
     arr: np.ndarray,
     loc: np.ndarray,
-    dst_path: PathLike
+    dst_path: PathLike,
+    verbose: bool = False
 ) -> None:
     """
     Collects Ground Control Points from a Geolocation Array backplane and
@@ -161,7 +159,9 @@ def apply_gcps_from_geolocation_array(
 def apply_gcps(
     arr: np.ndarray,
     gcp_pointer: np.ndarray | PathLike,
-    dst_path: PathLike
+    dst_path: PathLike,
+    input_array_offsets: Tuple[int, int],
+    verbose: bool = False
 ) -> None:
     """
     Applies Ground Control Points to a numpy array and saves it to dst_path as
@@ -171,18 +171,25 @@ def apply_gcps(
     ----------
     arr: np.ndarray
         Array to be georeferenced.
+
     gcp_pointer: np.ndarray | PathLike
         If an array is passed, it is assumed to be a geolocation array and
         `apply_gcps_from_geolocation_array` will be applied. If a file path
         is passed, this is assumed to be a path to a *.gcps file and
         `apply_gcps_from_file` will be used.
+
     dst_path: PathLike
         Save file path. Saved file will be in the GeoTiff format.
+
+    input_array_offsets: Tuple of 2 integers
+        (row offset, column offset) for the input array from the full
+        M<sup>3</sup> strip.
     """
     if isinstance(gcp_pointer, np.ndarray):
-        apply_gcps_from_geolocation_array(arr, gcp_pointer, dst_path)
+        _apply_gcps_from_geolocation_array(arr, gcp_pointer, dst_path, verbose)
     elif isinstance(gcp_pointer, PathLike):
-        apply_gcps_from_file(arr, gcp_pointer, dst_path)
+        _apply_gcps_from_file(arr, gcp_pointer, dst_path, input_array_offsets,
+                              verbose)
     else:
         raise TypeError(f"{type(gcp_pointer)} is an invalid type for a gcp"
                         "pointer.")
@@ -192,7 +199,8 @@ def warp_to_gcps(
     src_path: PathLike,
     gcps: List[GroundControlPoint],
     dst_path: Optional[PathLike] = None,
-    gdal_conda_env_name: str = "gdal"
+    gdal_conda_env_name: str = "gdal",
+    verbose: bool = False
 ):
     """
     Uses GDALs warp functionality to warp an image to a set of Ground Control
@@ -226,24 +234,25 @@ def warp_to_gcps(
 
     tempfile = tf.NamedTemporaryFile(suffix=".tif")
     tempfile.close()
-    tempfile = Path(tempfile.name)
+    tempfile_path = Path(tempfile.name)
 
     gcp_list_as_strings = [f"{i.col} {i.row} {i.x} {i.y}" for i in gcps]
     gdal_translate = "gdal_translate -gcp " \
                      f"{' -gcp '.join(gcp_list_as_strings)} "\
-                     f"{src_path} {tempfile}"
+                     f"{src_path} {tempfile_path}"
 
     gdal_warp = "gdalwarp -r near -tps -t_srs " \
-                f"{prj_file} {tempfile} {dst_path}"
+                f"{prj_file} {tempfile_path} {dst_path}"
 
     def run_command_in_conda_env(env_name: str, command_str: str):
         out = subprocess.run(
             f"conda run -n {env_name} {command_str}".split(),
             shell=True, capture_output=True
         )
-        print(command_str)
-        print(f"----STDOUT----\n{out.stdout.decode("utf-8")}")
-        print(f"----STDERR----\n{out.stderr.decode("utf-8")}")
+        if verbose:
+            print(command_str)
+            print(f"----STDOUT----\n{out.stdout.decode("utf-8")}")
+            print(f"----STDERR----\n{out.stderr.decode("utf-8")}")
 
     run_command_in_conda_env(gdal_conda_env_name, gdal_translate)
     run_command_in_conda_env(gdal_conda_env_name, gdal_warp)

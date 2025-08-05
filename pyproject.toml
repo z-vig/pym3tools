@@ -20,7 +20,9 @@ dependencies = [
     "requests",
     "tqdm",
     "h5py",
-    "rasterio"
+    "rasterio",
+    "pyyaml",
+    "pydantic"
 ]
 
 [tools.setuptools]

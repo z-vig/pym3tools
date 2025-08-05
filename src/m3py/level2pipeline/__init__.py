@@ -7,10 +7,16 @@ Level 2 using a config.yaml file.
 
 from .main_pipeline import M3Level2Pipeline
 from .step import Step
-from .init_cache import InitCache
+from .crop import Crop
+from .georeference import Georeference
+from .terrain_model import TerrainModel
+from .solar_spectrum_reomval import SolarSpectrumRemoval
 
 __all__ = [
     "Step",
-    "InitCache",
+    "Crop",
+    "Georeference",
+    "TerrainModel",
+    "SolarSpectrumRemoval",
     "M3Level2Pipeline"
 ]

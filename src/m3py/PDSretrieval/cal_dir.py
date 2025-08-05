@@ -7,8 +7,20 @@ import re
 from .file_retrieval_patterns import FileRetrievalPatterns
 from .retrieve_urls import retrieve_urls
 
+PathLike = str | os.PathLike | Path
+
 
 class CalDir:
+    root: PathLike
+    retrieval: PathLike
+    acq_type: str
+    solar_spectrum: PathLike
+    statistical_polish1: PathLike
+    statistical_polish2: PathLike
+    phase_function: PathLike
+    ground_truth1: PathLike
+    ground_truth2: PathLike
+
     def __init__(
         self,
         parent: os.PathLike,
@@ -55,7 +67,7 @@ class CalDir:
 
     def __str__(self):
         tree_string = (
-            f"{self.root.name}\n"
+            f"{Path(self.root).name}\n"
         )
         for k, v in vars(self).items():
             if k not in ("root", "acq_type"):

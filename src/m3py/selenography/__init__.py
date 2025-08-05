@@ -15,13 +15,17 @@ commands to install it mannually:
 ~~~
 """
 
-from .crop import polar_crop
+from .crop import polar_crop, regional_crop
 from .gcp_utils import apply_gcps
-from .gcp_loaders import load_gcps, read_gcps_header
+from .gcp_loaders import load_gcps, read_gcps_header, read_gcps
+from .basic_pixel_alignment import align_pixels
 
 __all__ = [
     "polar_crop",
+    "regional_crop",
     "apply_gcps",
     "load_gcps",
-    "read_gcps_header"
+    "read_gcps",
+    "read_gcps_header",
+    "align_pixels"
 ]
