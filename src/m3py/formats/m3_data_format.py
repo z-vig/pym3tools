@@ -80,3 +80,8 @@ OBS = M3DataFormat(
     AcqTypeFormat(10, 304, "<f", 0),
     AcqTypeFormat(10, 608, "<f", 0)
 )
+
+SUP = M3DataFormat(
+    AcqTypeFormat(3, 304, "<f", 0),
+    AcqTypeFormat(3, 608, "<f", 0)
+)

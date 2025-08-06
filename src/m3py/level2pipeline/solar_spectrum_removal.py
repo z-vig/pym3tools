@@ -4,7 +4,7 @@ import h5py as h5  # type: ignore
 
 # Relative Imports
 from .step import Step, PipelineState
-from .data_fetching_utils import get_solar_correction_values
+from .utils.data_fetching_utils import get_solar_correction_values
 
 
 class SolarSpectrumRemoval(Step):

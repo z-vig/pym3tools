@@ -6,7 +6,7 @@ from typing import Optional, Sequence, Tuple, Mapping
 
 # Top-Level Imports
 from m3py.PDSretrieval import M3FileManager
-from m3py.constants import M3DataFormat
+from m3py.formats.m3_data_format import M3DataFormat
 
 # Dependencies
 import numpy as np

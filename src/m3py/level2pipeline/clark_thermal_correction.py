@@ -11,11 +11,11 @@ from .step import Step, PipelineState
 from .photometric_correction import (
     compute_f_alpha, compute_limb_darkening_correction_factor
 )
-from .thermal_correction_utils import (
+from .utils.thermal_correction_utils import (
     RefWvlSet, linear_projection, get_temp, get_thermal_spectrum,
     get_temp_photometric
 )
-from .data_fetching_utils import (
+from .utils.data_fetching_utils import (
     get_solar_correction_values, get_phase_function_rgi
 )
 
@@ -42,18 +42,15 @@ class ClarkThermalCorrection(Step):
             reference_wvl, solar_wvl, solar_spec, solar_distance, f_alpha_rgi
         )
 
-    def run(self, state: PipelineState) -> PipelineState:
-        # Creating temperature logging array
-        self.temp_log = np.full(
-            (*state.data.shape[:2], self.max_iterations+1), np.nan
-        )
-
-        self.final_correction = state.data.copy()
-        iter_counter = 0
-
-        # Pre-loading context variables
-        refwvl, sol_wvl, sol_spec, sol_dist, rgi =\
-            self._load_context_variables(state)
+    def _initial_temp_correction(
+        self,
+        state: PipelineState,
+        refwvl: RefWvlSet,
+        sol_spec: np.ndarray,
+        sol_wvl: np.ndarray,
+        sol_dist: float,
+        rgi: RegularGridInterpolator
+    ):
 
         state.data = state.data * sol_dist ** 2
 
@@ -88,9 +85,29 @@ class ClarkThermalCorrection(Step):
         # Limb-Darkening Factor
         ldf = compute_limb_darkening_correction_factor(state.obs)
 
-        self.photo_coefs = ldf[:, :, None] * f_alpha_norm
+        photo_coefs = ldf[:, :, None] * f_alpha_norm
 
-        next_step = self.photo_coefs * initial_thermal_removed
+        initial_correction = photo_coefs * initial_thermal_removed
+
+        return initial_correction, initial_temp, photo_coefs
+
+    def run(self, state: PipelineState) -> PipelineState:
+        # Pre-loading context variables
+        refwvl, sol_wvl, sol_spec, sol_dist, rgi =\
+            self._load_context_variables(state)
+
+        # Creating temperature logging array
+        self.temp_log = np.full(
+            (*state.data.shape[:2], self.max_iterations+1), np.nan
+        )
+
+        self.final_correction = state.data.copy()
+        iter_counter = 0
+
+        next_step, initial_temp, self.photo_coefs =\
+            self._initial_temp_correction(
+                state, refwvl, sol_spec, sol_wvl, sol_dist, rgi
+            )
 
         self.temp_log[:, :, iter_counter] = initial_temp
 
@@ -102,6 +119,8 @@ class ClarkThermalCorrection(Step):
             next_thermal_component = next_step[:, :, refwvl.C.index] -\
                 linear_projection(next_step, refwvl, initial=False)
             next_thermal_component[next_thermal_component < 0] = np.nan
+
+            Fidx = np.argmin(np.abs(sol_wvl - refwvl.C.actual))
 
             next_temp = get_temp_photometric(
                 next_thermal_component,

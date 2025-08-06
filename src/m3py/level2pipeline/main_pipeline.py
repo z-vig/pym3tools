@@ -13,7 +13,7 @@ from .step import Step, PipelineState
 from m3py.metadata_models import GeorefData
 from m3py.PDSretrieval.file_manager import M3FileManager
 from m3py.io.read_m3 import read_m3, get_wavelengths
-from m3py.constants import L1, OBS
+from m3py.formats import L1, OBS
 
 type PathType = str | os.PathLike
 

@@ -9,9 +9,10 @@ from .step import Step
 from .crop import Crop
 from .georeference import Georeference
 from .terrain_model import TerrainModel
-from .solar_spectrum_reomval import SolarSpectrumRemoval
+from .solar_spectrum_removal import SolarSpectrumRemoval
 from .statistical_polish import StatisticalPolish
 from .clark_thermal_correction import ClarkThermalCorrection
+from . import utils
 
 __all__ = [
     "Step",
@@ -20,5 +21,6 @@ __all__ = [
     "TerrainModel",
     "SolarSpectrumRemoval",
     "StatisticalPolish",
-    "ClarkThermalCorrection"
+    "ClarkThermalCorrection",
+    "utils"
 ]

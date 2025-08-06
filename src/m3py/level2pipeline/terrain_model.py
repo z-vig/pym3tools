@@ -2,7 +2,6 @@
 import os
 from pathlib import Path
 import tempfile as tf
-from dataclasses import dataclass
 
 # Deendencies
 import rasterio as rio  # type: ignore
@@ -10,80 +9,12 @@ import numpy as np
 
 # Relative Imports
 from .step import Step, PipelineState
+from .utils.terrain_model_utils import calc_i, calc_e, calc_g, M3Geometry
 
 # Top-Level Imports
 from m3py.selenography.basic_pixel_alignment import align_pixels
 
 PathLike = str | os.PathLike | Path
-
-
-class AngularUnitsError(Exception):
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-
-
-@dataclass
-class M3Geometry:
-    solaz: np.ndarray
-    solze: np.ndarray
-    m3az: np.ndarray
-    m3ze: np.ndarray
-    phase: np.ndarray
-    solen: np.ndarray
-    m3len: np.ndarray
-    slope: np.ndarray
-    aspect: np.ndarray
-    cosi: np.ndarray
-    radians: bool
-
-    @classmethod
-    def from_obs(cls, obs: np.ndarray) -> "M3Geometry":
-        obs[obs == -999] = np.nan
-        keys = list(cls.__dataclass_fields__.keys())
-        values = {k: obs[:, :, i] for i, k in enumerate(keys[:-1])}
-        return cls(**values, radians=False)
-
-    def convert_to_rad(self):
-        keys = list(self.__dataclass_fields__.keys())[:-1]
-        deg_to_rad = np.pi/180
-        [setattr(self, k, deg_to_rad * getattr(self, k)) for k in keys]
-        self.radians = True
-
-
-def calc_i(geo: M3Geometry) -> np.ndarray:
-    if not geo.radians:
-        raise AngularUnitsError(
-            "Before calculating incidence angle, geo must be in Radians. Try"
-            "running geo.convert_to_rad()"
-        )
-    arg = np.cos(geo.solze) * np.cos(geo.slope) +\
-        np.sin(geo.solze) * np.sin(geo.slope) * np.cos(geo.solaz - geo.aspect)
-    incidence_angle = (180/np.pi) * np.acos(arg)
-    return incidence_angle
-
-
-def calc_e(geo: M3Geometry) -> np.ndarray:
-    if not geo.radians:
-        raise AngularUnitsError(
-            "Before calculating emission angle, geo must be in Radians. Try"
-            "running geo.convert_to_rad()"
-        )
-    arg = np.cos(geo.m3ze) * np.cos(geo.slope) +\
-        np.sin(geo.m3ze) * np.sin(geo.slope) * np.cos(geo.m3az - geo.aspect)
-    emission_angle = (180/np.pi) * np.acos(arg)
-    return emission_angle
-
-
-def calc_g(geo: M3Geometry) -> np.ndarray:
-    if not geo.radians:
-        raise AngularUnitsError(
-            "Before calculating phase angle, geo must be in Radians. Try"
-            "running geo.convert_to_rad()"
-        )
-    arg = np.cos(geo.m3ze) * np.cos(geo.solze) +\
-        np.sin(geo.m3ze) * np.sin(geo.solze) * np.cos(geo.solaz - geo.m3az)
-    phase_angle = (180/np.pi) * np.acos(arg)
-    return phase_angle
 
 
 class TerrainModel(Step):
@@ -92,13 +23,18 @@ class TerrainModel(Step):
         name: str,
         slope_path: PathLike,
         aspect_path: PathLike,
+        use_PDS_terrain_model: bool = False,
         **kwargs
     ) -> None:
         super().__init__(name, **kwargs)
         self.slope_path = slope_path
         self.aspect_path = aspect_path
+        self._use_PDS = use_PDS_terrain_model
 
-    def run(self, state: PipelineState) -> PipelineState:
+    def _compute_obs_from_aligned_terrain(
+        self,
+        state: PipelineState
+    ) -> np.ndarray:
         data_temp = tf.NamedTemporaryFile(suffix=".tif")
         aligned_slope_temp = tf.NamedTemporaryFile(suffix=".tif")
         aligned_aspect_temp = tf.NamedTemporaryFile(suffix=".tif")
@@ -152,19 +88,27 @@ class TerrainModel(Step):
         emission_map = calc_e(m3geom)
         phase_map = calc_g(m3geom)
 
+        new_obs = np.concat([
+                incidence_map[:, :, np.newaxis],
+                emission_map[:, :, np.newaxis],
+                phase_map[:, :, np.newaxis],
+                slope_map[:, :, np.newaxis],
+                aspect_map[:, :, np.newaxis]
+            ], axis=2)
+
+        return new_obs
+
+    def run(self, state: PipelineState) -> PipelineState:
+
+        if self._use_PDS:
+            new_obs = np.empty((*state.data.shape[:2], 5))
+        else:
+            new_obs = self._compute_obs_from_aligned_terrain(state)
+
         new_state = PipelineState(
             data=state.data,
             wvl=state.wvl,
-            obs=np.concat(
-                [
-                    incidence_map[:, :, np.newaxis],
-                    emission_map[:, :, np.newaxis],
-                    phase_map[:, :, np.newaxis],
-                    slope_map[:, :, np.newaxis],
-                    aspect_map[:, :, np.newaxis]
-                ],
-                axis=2
-            ),
+            obs=new_obs,
             georef=state.georef
         )
 

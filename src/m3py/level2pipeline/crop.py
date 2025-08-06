@@ -10,7 +10,7 @@ from .step import Step, PipelineState
 
 # Top-Level Imports
 from m3py.io.read_m3 import read_m3
-from m3py.constants.m3_data_format import LOC
+from m3py.formats.m3_data_format import LOC
 from m3py.selenography.crop import regional_crop
 
 PathLike = str | os.PathLike | Path

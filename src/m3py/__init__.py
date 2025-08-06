@@ -15,7 +15,7 @@ Planetary Data System. Available modules include:
                     pipeline is configured using *.yaml files.
 """
 
-from . import constants
+from . import formats
 from . import io
 from . import level2pipeline
 from . import selenography
@@ -24,7 +24,7 @@ from .PDSretrieval import M3FileManager, get_m3_id
 from .level2pipeline.main_pipeline import M3Level2Pipeline
 
 __all__ = [
-    "constants",
+    "formats",
     "io",
     "level2pipeline",
     "selenography",
