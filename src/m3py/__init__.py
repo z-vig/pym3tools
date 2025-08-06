@@ -21,6 +21,7 @@ from . import level2pipeline
 from . import selenography
 from . import metadata_models
 from .PDSretrieval import M3FileManager, get_m3_id
+from .level2pipeline.main_pipeline import M3Level2Pipeline
 
 __all__ = [
     "constants",
@@ -29,5 +30,6 @@ __all__ = [
     "selenography",
     "metadata_models",
     "M3FileManager",
+    "M3Level2Pipeline",
     "get_m3_id"
 ]

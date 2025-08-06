@@ -30,12 +30,6 @@ def LL(i: float, e: float, g: float):
     return L(g) * XL(i, e, g) + (1 - L(g)) * np.cos(i*d2r)
 
 
-def get_rgi(phase_function_lookup: np.ndarray) -> RegularGridInterpolator:
-    x = np.arange(phase_function_lookup.shape[0])
-    y = np.arange(phase_function_lookup.shape[1])
-    return RegularGridInterpolator((x, y), phase_function_lookup)
-
-
 def compute_f_alpha(
     phase_angle_array: np.ndarray,
     f_alpha_rgi: RegularGridInterpolator,

@@ -1,6 +1,5 @@
 # Standard Libraries
 from typing import Tuple
-import re
 
 # Dependencies
 import numpy as np
@@ -10,15 +9,15 @@ import h5py as h5  # type: ignore
 # Relative Imports
 from .step import Step, PipelineState
 from .photometric_correction import (
-    get_rgi, compute_f_alpha, compute_limb_darkening_correction_factor
+    compute_f_alpha, compute_limb_darkening_correction_factor
 )
 from .thermal_correction_utils import (
     RefWvlSet, linear_projection, get_temp, get_thermal_spectrum,
     get_temp_photometric
 )
-
-# Top-level imports
-from m3py.io.read_m3 import get_wavelengths
+from .data_fetching_utils import (
+    get_solar_correction_values, get_phase_function_rgi
+)
 
 
 class ClarkThermalCorrection(Step):
@@ -33,33 +32,11 @@ class ClarkThermalCorrection(Step):
         RefWvlSet, np.ndarray, np.ndarray, float, RegularGridInterpolator
     ]:
         reference_wvl = RefWvlSet.from_data(state.wvl)
-        solspec_parse = re.compile(r"\s*(\d{2,4}.\d{6})")
-        _, bbl = get_wavelengths(self.manager)
-        with open(self.manager.cal_dir.solar_spectrum) as f:
-            data_array = np.array(
-                [re.findall(solspec_parse, i) for i in f.readlines()],
-                dtype=np.float32
-            )
-            solar_wvl = data_array[bbl, 0]
-            solar_spec = data_array[bbl, 1]
 
-        solar_distance_pattern = re.compile(
-            r"SOLAR_DISTANCE\s*=\s(\d.\d*)\s<AU>"
-        )
-        with open(self.manager.pds_dir.l1.lbl) as f:
-            solar_distance = float(re.findall(
-                solar_distance_pattern, f.read()
-            )[0])
+        solar_spec, solar_wvl, solar_distance =\
+            get_solar_correction_values(self.manager)
 
-        pattern = re.compile(r"\s\d.\d{9}")
-        with open(self.manager.cal_dir.phase_function) as f:
-            phase_function_lookup = np.array(
-                [re.findall(pattern, i) for i in f.readlines()[1:]],
-                dtype=np.float32
-            )
-            phase_function_lookup = phase_function_lookup[:100, bbl]
-
-        f_alpha_rgi = get_rgi(phase_function_lookup)
+        f_alpha_rgi = get_phase_function_rgi(self.manager)
 
         return (
             reference_wvl, solar_wvl, solar_spec, solar_distance, f_alpha_rgi
