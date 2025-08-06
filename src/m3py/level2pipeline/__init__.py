@@ -12,7 +12,7 @@ from .georeference import Georeference
 from .terrain_model import TerrainModel
 from .solar_spectrum_reomval import SolarSpectrumRemoval
 from .statistical_polish import StatisticalPolish
-from .clark_thermal_correction_vectorized import ClarkThermalCorrection
+from .clark_thermal_correction import ClarkThermalCorrection
 
 __all__ = [
     "Step",

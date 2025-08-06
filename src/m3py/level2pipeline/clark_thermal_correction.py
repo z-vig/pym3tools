@@ -5,60 +5,24 @@ import re
 
 # Dependencies
 import numpy as np
-from tqdm import tqdm  # type: ignore
+from scipy.interpolate import RegularGridInterpolator  # type: ignore
 import h5py as h5  # type: ignore
 
 # Relative Imports
 from .step import Step, PipelineState
 from .photometric_correction import (
-    photometric_correction_single_spectrum, get_rgi, compute_f_alpha
+    get_rgi, compute_f_alpha, compute_limb_darkening_correction_factor
 )
-
-# Top-Level Imports
+# Top-level imports
 from m3py.io.read_m3 import get_wavelengths
 
 # Some constants
 h: Final[float] = 6.626 * 10**-34  # J*s, planck's constant
 k_b: Final[float] = 1.381 * 10**-23  # J/K, boltzmann's constant
-c: Final[float] = 2.998 * 10**8  # m/s, speed of light
+c: Final[float] = 2.998 * 10**8  # m/s, speed of lig
 
 
-def last_nonzero_val_3D(cube, return_index=False):
-    """
-    If you have an empty 3D image array with the first two dimensions being
-    pixels and the third dimension of size N, and each pixel is filled in to a
-    certain depth, M <= N, this function returns a 2D image array that picks
-    out all the pixel values at position M.
-    """
-    nx, ny, _ = cube.shape
-    result = np.empty((nx, ny), dtype=cube.dtype)
-    for i in range(nx):
-        for j in range(ny):
-            vals = cube[i, j, :]
-            nonzero_indices = np.nonzero(vals)[0]
-            if return_index:
-                result[i, j] = nonzero_indices[-1] if\
-                    nonzero_indices.size > 0 else 0
-            else:
-                result[i, j] = vals[nonzero_indices[-1]] if\
-                    nonzero_indices.size > 0 else 0
-    return result
-
-
-def last_nonzero_val_4D(cube):
-    """
-    An equivalent of `last_nonzero_val_3D` but for 4D starting arrays.
-    """
-    nx, ny, nz, _ = cube.shape
-    last_idx = last_nonzero_val_3D(cube[:, :, 0, :], return_index=True)
-    result = np.empty((nx, ny, nz), dtype=cube.dtype)
-    for i in range(nx):
-        for j in range(ny):
-            idx = int(last_idx[i, j])
-            result[i, j, :] = cube[i, j, :, idx]
-    return result
-
-
+# Helper functions
 def find_wvl(wvls: np.ndarray, targetwvl: float) -> Tuple[int, float]:
     """
         findλ(λ.targetλ)
@@ -85,34 +49,7 @@ def find_wvl(wvls: np.ndarray, targetwvl: float) -> Tuple[int, float]:
     return int(idx), wvls[idx]
 
 
-def project_line(
-    pt1: Tuple[float, float],
-    pt2: Tuple[float, float],
-    x3: float
-) -> float:
-    """
-    Given two points and third x-value, project line through the two points and
-    return the projected Y value at the third point.
-
-    Parameters
-    ----------
-    pt1: Tuple[float, float]
-        First X, Y point to fit.
-    pt2: Tuple[float, float]
-        Second X, Y point to fit.
-    x3: float
-        X value to project line to.
-
-    Returns
-    -------
-    y3: float
-        Projected Y value at `x3`.
-    """
-    m = (pt2[1] - pt1[1]) / (pt2[0] - pt1[0])
-    y3 = m * (x3 - pt1[0]) + pt1[1]
-    return y3
-
-
+# Data Organization Classes
 @dataclass
 class RefWvl:
     target: int
@@ -141,122 +78,41 @@ class RefWvlSet:
         return cls(**initializing_dict)
 
 
-def get_temp(
-    B: float,
-    emiss: float,
-    wvl: float,
-    F: float
-) -> float:
-    return (h * c / (wvl * k_b)) *\
-        (np.log(((2 * h * c**2 * emiss)/(F * B * wvl**5)) + 1))**-1
-
-
-def get_temp_iter(
-    B: float,
-    emiss: float,
-    wvl: float,
-    F: float,
-    phi: float
-) -> float:
-    return (h * c / (wvl * k_b)) *\
-        (np.log(((2 * h * c**2 * emiss * phi) / (F * B * wvl**5)) + 1))**-1
-
-
-def get_thermal_spectrum(
-    wvl: np.ndarray,
-    temperature: float,
-    solar_spectrum: np.ndarray,
-    solar_distance: float
-) -> np.ndarray:
-    if np.isfinite(temperature):
-        B = ((2 * h * c**2) / (wvl ** 5)) *\
-            (1 / (np.exp((h * c) / (wvl * k_b * temperature)) - 1))
-        F = 10**6 * solar_spectrum / np.pi
-        therm_spec = (B / F) * solar_distance**2
-        return therm_spec
-    elif np.isnan(temperature):
-        return np.zeros(wvl.shape, dtype=np.float32)
-    else:
-        raise ValueError("Temperature is not NaN or finite float.")
-
-
-def initial_temperature_estimate(
-    spectrum: np.ndarray,
+# Thermal Correction Functions
+def linear_projection(
+    data: np.ndarray,
     refwvl: RefWvlSet,
-    solar_wvl: np.ndarray,
-    solar_spectrum: np.ndarray
-) -> float:
-    ptA = (refwvl.A.actual, spectrum[refwvl.A.index])
-    ptB = (refwvl.B.actual, spectrum[refwvl.B.index])
-
-    Yval_at_C = project_line(ptA, ptB, refwvl.C.actual)
-    initial_thermal_component = spectrum[refwvl.C.index] - Yval_at_C
-
-    if initial_thermal_component < 0:
-        return np.nan
-
-    initial_emissivity = 1 - spectrum[refwvl.A.index]
-
-    Fidx = np.argmin(solar_wvl - refwvl.C.actual)  # Index of solar spectrum(F)
-
-    initial_temp = get_temp(
-        initial_thermal_component,
-        initial_emissivity,
-        refwvl.C.actual * 10**-9,
-        10**6 * solar_spectrum[Fidx] / np.pi
-    )
-
-    return initial_temp
-
-
-def iterative_temperature_estimate(
-    spectrum: np.ndarray,
-    refwvl: RefWvlSet,
-    solar_wvl: np.ndarray,
-    solar_spectrum: np.ndarray,
-    photometric_coefs: np.ndarray
-) -> float:
-    wvl_dependent_emiss = 1 - spectrum
-
-    ptA = (refwvl.D.actual, spectrum[refwvl.D.index])
-    ptB = (refwvl.E.actual, spectrum[refwvl.E.index])
-
-    Yval_at_C = project_line(ptA, ptB, refwvl.C.actual)
-    next_thermal_component = spectrum[refwvl.C.index] - Yval_at_C
-
-    if next_thermal_component < 0:
-        return np.nan
-
-    # Index of solar spectrum(F)
-    Fidx = np.argmin(np.abs(solar_wvl - refwvl.C.actual))
-
-    next_temp_estimate = get_temp_iter(
-        next_thermal_component,
-        wvl_dependent_emiss[refwvl.C.index],
-        refwvl.C.actual * 10**-9,
-        10**6 * solar_spectrum[Fidx] / np.pi,
-        photometric_coefs[refwvl.C.index]
-    )
-
-    return next_temp_estimate
-
-
-def remove_thermal(
-    spectrum: np.ndarray,
-    wavelengths: np.ndarray,
-    temperature: float,
-    solar_spectrum: np.ndarray,
-    solar_distance: float,
-    return_thermal_spectrum: bool = False
+    initial: bool
 ) -> np.ndarray:
-    thermal_spectrum = get_thermal_spectrum(
-        wavelengths * 10**-9, temperature, solar_spectrum, solar_distance
-    )
-
-    if return_thermal_spectrum:
-        return thermal_spectrum
+    if initial:
+        y_proj = (((data[:, :, refwvl.B.index] - data[:, :, refwvl.A.index]) /
+                  (refwvl.B.actual - refwvl.A.actual)) *
+                  (refwvl.C.actual - refwvl.A.actual)) +\
+                  data[:, :, refwvl.A.index]
     else:
-        return spectrum - thermal_spectrum
+        y_proj = (((data[:, :, refwvl.E.index] - data[:, :, refwvl.D.index]) /
+                  (refwvl.E.actual - refwvl.D.actual)) *
+                  (refwvl.C.actual - refwvl.D.actual)) +\
+                  data[:, :, refwvl.D.index]
+    return y_proj
+
+
+def get_temp(B, e, w, F):
+    return (h * c / (w * k_b)) *\
+        (np.log(((2 * h * c**2 * e) / (F * B * w**5)) + 1))**-1
+
+
+def get_temp_photometric(B, e, w, F, phi):
+    return (h * c / (w * k_b)) *\
+        (np.log(((2 * h * c**2 * e * phi) / (F * B * w**5)) + 1))**-1
+
+
+def get_thermal_spectrum(wvl, temp, solar_spec, solar_dist):
+    B = ((2 * h * c**2) / (wvl ** 5)) *\
+        (1 / (np.exp((h * c) / (wvl * k_b * temp)) - 1))
+    F = 10**6 * solar_spec / np.pi
+    therm_spec = (B / F) * solar_dist**2
+    return therm_spec
 
 
 class ClarkThermalCorrection(Step):
@@ -264,20 +120,13 @@ class ClarkThermalCorrection(Step):
         super().__init__(name, **kwargs)
         self.max_iterations = max_iterations
 
-    def run(self, state: PipelineState) -> PipelineState:
-        temperature_maps = np.full(
-            (*state.data.shape[:2], self.max_iterations),
-            fill_value=np.nan,
-            dtype=np.float32
-        )
-        correction_steps = np.full(
-            (*state.data.shape, self.max_iterations),
-            fill_value=np.nan,
-            dtype=np.float32
-        )
-
+    def _load_context_variables(
+        self,
+        state: PipelineState
+    ) -> Tuple[
+        RefWvlSet, np.ndarray, np.ndarray, float, RegularGridInterpolator
+    ]:
         reference_wvl = RefWvlSet.from_data(state.wvl)
-
         solspec_parse = re.compile(r"\s*(\d{2,4}.\d{6})")
         _, bbl = get_wavelengths(self.manager)
         with open(self.manager.cal_dir.solar_spectrum) as f:
@@ -305,95 +154,117 @@ class ClarkThermalCorrection(Step):
             phase_function_lookup = phase_function_lookup[:100, bbl]
 
         f_alpha_rgi = get_rgi(phase_function_lookup)
-        wvl_size = state.wvl.size
 
-        for i in tqdm(range(state.data.shape[0]),
-                      desc="Iteratively solving pixels..."):
-            for j in range(state.data.shape[1]):
-                iter_counter = 0
+        return (
+            reference_wvl, solar_wvl, solar_spec, solar_distance, f_alpha_rgi
+        )
 
-                spectrum = state.data[i, j, :]
+    def run(self, state: PipelineState) -> PipelineState:
+        # Creating temperature logging array
+        self.temp_log = np.full(
+            (*state.data.shape[:2], self.max_iterations+1), np.nan
+        )
 
-                if np.all(np.isnan(spectrum)):
-                    continue
+        self.final_correction = state.data.copy()
+        iter_counter = 0
 
-                # Removing solar distance correction
-                spectrum *= solar_distance ** 2
+        # Pre-loading context variables
+        refwvl, sol_wvl, sol_spec, sol_dist, rgi =\
+            self._load_context_variables(state)
 
-                initial_temp = initial_temperature_estimate(
-                    spectrum,
-                    reference_wvl,
-                    solar_wvl,
-                    solar_spec
-                )
+        state.data = state.data * sol_dist ** 2
 
-                no_thermal = remove_thermal(
-                    spectrum,
-                    state.wvl,
-                    initial_temp,
-                    solar_spec,
-                    solar_distance
-                )
+        initial_thermal_component = state.data[:, :, refwvl.C.index] -\
+            linear_projection(state.data, refwvl, initial=True)
 
-                i_val = state.obs[i, j, 0]
-                e_val = state.obs[i, j, 1]
-                g_val = state.obs[i, j, 2]
+        initial_thermal_component[initial_thermal_component < 0] = np.nan
 
-                f_alpha = compute_f_alpha(g_val, f_alpha_rgi, wvl_size)
+        initial_emissivity = 1 - state.data[:, :, refwvl.A.index]
 
-                first_temp_photo_corrected, photo_coefs =\
-                    photometric_correction_single_spectrum(
-                        no_thermal, i_val, e_val, g_val, f_alpha,
-                        limb_darkening="Lommel-Seeliger"
-                    )
+        Fidx = np.argmin(np.abs(sol_wvl - refwvl.C.actual))
 
-                temperature_maps[i, j, iter_counter] = initial_temp
+        initial_temp = get_temp(
+            initial_thermal_component,
+            initial_emissivity,
+            refwvl.C.actual * 10**-9,
+            10**6 * sol_spec[Fidx] / np.pi
+        )
 
-                correction_steps[
-                    i, j, :, iter_counter
-                ] = first_temp_photo_corrected
+        initial_thermal_spectra = get_thermal_spectrum(
+            state.wvl[None, None, :] * 10**-9,
+            initial_temp[:, :, None],
+            sol_spec[None, None, :],
+            sol_dist
+        )
 
-                iter_counter += 1
+        initial_thermal_removed = state.data - initial_thermal_spectra
 
-                while True:
-                    next_temp = iterative_temperature_estimate(
-                        correction_steps[i, j, :, iter_counter],
-                        reference_wvl,
-                        solar_wvl,
-                        solar_spec,
-                        photo_coefs
-                    )
+        # Phase Function Factor
+        f_alpha_norm = compute_f_alpha(state.obs[:, :, 2], rgi, state.wvl.size)
 
-                    next_no_thermal = remove_thermal(
-                        spectrum,
-                        state.wvl,
-                        next_temp,
-                        solar_spec,
-                        solar_distance
-                    )
+        # Limb-Darkening Factor
+        ldf = compute_limb_darkening_correction_factor(state.obs)
 
-                    next_temp_photo_corrected = photo_coefs * next_no_thermal
-                    iter_counter += 1
+        self.photo_coefs = ldf[:, :, None] * f_alpha_norm
 
-                    if iter_counter < self.max_iterations:
-                        temperature_maps[i, j, iter_counter] = next_temp
+        next_step = self.photo_coefs * initial_thermal_removed
 
-                        correction_steps[
-                            i, j, :, iter_counter
-                        ] = next_temp_photo_corrected
-                    else:
-                        break
+        self.temp_log[:, :, iter_counter] = initial_temp
 
-                    if abs(
-                        next_temp - temperature_maps[i, j, iter_counter-1]
-                    ) < 2:
-                        break
+        correction_exists = ~np.isnan(next_step)
+        self.final_correction[correction_exists] = next_step[correction_exists]
 
-        self.final_temp_map = last_nonzero_val_3D(temperature_maps)
-        final_temp_correction = last_nonzero_val_4D(correction_steps)
+        while True:
+            wvl_dependent_emiss = 1 - next_step
+            next_thermal_component = next_step[:, :, refwvl.C.index] -\
+                linear_projection(next_step, refwvl, initial=False)
+            next_thermal_component[next_thermal_component < 0] = np.nan
+
+            next_temp = get_temp_photometric(
+                next_thermal_component,
+                wvl_dependent_emiss[:, :, refwvl.C.index],
+                refwvl.C.actual * 10**-9,
+                10**6 * sol_spec[Fidx] / np.pi,
+                self.photo_coefs[:, :, refwvl.C.index]
+            )
+
+            next_thermal_spectra = get_thermal_spectrum(
+                state.wvl[None, None, :] * 10**-9,
+                next_temp[:, :, None],
+                sol_spec[None, None, :],
+                sol_dist
+            )
+
+            next_thermal_removed = state.data - next_thermal_spectra
+
+            next_step = self.photo_coefs * next_thermal_removed
+
+            iter_counter += 1
+            print(f"Iteration Count: {iter_counter}")
+
+            if iter_counter < self.max_iterations:
+                self.temp_log[:, :, iter_counter] = next_temp
+                correction_exists = ~np.isnan(next_step)
+                self.final_correction[correction_exists] =\
+                    next_step[correction_exists]
+            else:
+                self.temp_log[:, :, iter_counter] = next_temp
+                correction_exists = ~np.isnan(next_step)
+                self.final_correction[correction_exists] =\
+                    next_step[correction_exists]
+                break
+
+            if np.all(
+                np.abs(next_temp - self.temp_log[:, :, iter_counter-1]) < 2
+            ):
+                self.temp_log[:, :, iter_counter] = next_temp
+                correction_exists = ~np.isnan(next_step)
+                self.final_correction[correction_exists] =\
+                    next_step[correction_exists]
+                break
 
         new_state = PipelineState(
-            data=final_temp_correction,
+            data=self.final_correction,
             wvl=state.wvl,
             obs=state.obs,
             georef=state.georef
@@ -406,5 +277,6 @@ class ClarkThermalCorrection(Step):
         with h5.File(self.manager.cache, "r+") as f:
             g = f[self.name]
             assert isinstance(g, h5.Group)
-            g.create_dataset("temperature_map",
-                             data=self.final_temp_map, dtype="f4")
+            g.create_dataset("photometric_coefficients",
+                             data=self.photo_coefs, dtype="f4")
+            g.create_dataset("temp", data=self.temp_log, dtype="f4")
