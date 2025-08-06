@@ -11,6 +11,11 @@ from m3py.io.read_m3 import get_wavelengths
 from m3py.PDSretrieval.file_manager import M3FileManager
 
 
+class SolarSpectrumReadError(Exception):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
 def get_solar_correction_values(
     manager: M3FileManager
 ) -> Tuple[np.ndarray, np.ndarray, float]:
@@ -18,7 +23,7 @@ def get_solar_correction_values(
     Returns solar spectrum, solar wavelengths and solar distance.
     """
     solspec_parse = re.compile(r"\s*(\d{2,4}.\d{6})")
-    _, bbl = get_wavelengths(manager)
+    wvl, bbl = get_wavelengths(manager)
     with open(manager.cal_dir.solar_spectrum) as f:
         data_array = np.array(
             [re.findall(solspec_parse, i) for i in f.readlines()],
@@ -34,6 +39,12 @@ def get_solar_correction_values(
         solar_distance = float(re.findall(
             solar_distance_pattern, f.read()
         )[0])
+
+    if not np.allclose(solar_wvl, wvl):
+        raise SolarSpectrumReadError(
+            "The solar spectrum wavelength values do not match the data"
+            "wavelength values."
+        )
 
     return solar_spec, solar_wvl, solar_distance
 
