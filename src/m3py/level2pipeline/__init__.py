@@ -12,6 +12,7 @@ from .georeference import Georeference
 from .terrain_model import TerrainModel
 from .solar_spectrum_reomval import SolarSpectrumRemoval
 from .statistical_polish import StatisticalPolish
+from .clark_thermal_correction_vectorized import ClarkThermalCorrection
 
 __all__ = [
     "Step",
@@ -20,5 +21,6 @@ __all__ = [
     "TerrainModel",
     "SolarSpectrumRemoval",
     "StatisticalPolish",
+    "ClarkThermalCorrection",
     "M3Level2Pipeline"
 ]

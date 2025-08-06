@@ -22,7 +22,8 @@ dependencies = [
     "h5py",
     "rasterio",
     "pyyaml",
-    "pydantic"
+    "pydantic",
+    "scipy"
 ]
 
 [tools.setuptools]
