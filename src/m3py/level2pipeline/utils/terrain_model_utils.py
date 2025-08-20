@@ -38,7 +38,7 @@ class M3Geometry:
         return cls(**values, radians=False)
 
     def convert_to_rad(self):
-        keys = list(self.__dataclass_fields__.keys())[:-1]
+        keys = list(self.__dataclass_fields__.keys())[:-2]
         deg_to_rad = np.pi/180
         [setattr(self, k, deg_to_rad * getattr(self, k)) for k in keys]
         self.radians = True

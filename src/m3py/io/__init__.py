@@ -6,9 +6,11 @@ to hdf5 or geotiff formats.
 """
 
 from .read_m3 import read_m3, Window, get_wavelengths
+from .read_m3_georef import read_m3_georef
 
 __all__ = [
     "read_m3",
+    "read_m3_georef",
     "get_wavelengths",
     "Window"
 ]

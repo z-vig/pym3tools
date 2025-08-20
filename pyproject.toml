@@ -1,36 +1,29 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "m3py"
+version = "0.1.0"
 description = """Data utilities for processing Moon Mineralogy Mapper Data from
 the NASA Planetary Data System."""
 authors = [
-    {name = "Zachary M. Vig", email = "zvig@umd.edu"}
+    {name = "Z.M. Vig",email = "zvig@umd.edu"}
 ]
 keywords = ["hyperspectral", "processing", "spectral cube", "image", "M3"]
-version = "0.0.1"
+license = {text = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "numpy",
-    "psutil",
-    "matplotlib",
-    "requests",
-    "tqdm",
-    "h5py",
-    "rasterio",
-    "pyyaml",
-    "pydantic",
-    "scipy"
+    "numpy (>=2.3.2,<3.0.0)",
+    "psutil (>=7.0.0,<8.0.0)",
+    "matplotlib (>=3.10.5,<4.0.0)",
+    "requests (>=2.32.4,<3.0.0)",
+    "tqdm (>=4.67.1,<5.0.0)",
+    "h5py (>=3.14.0,<4.0.0)",
+    "rasterio (>=1.4.3,<2.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "pydantic (>=2.11.7,<3.0.0)",
+    "scipy (>=1.16.1,<2.0.0)"
 ]
 
-[tools.setuptools]
-package-dir = {"" = "src"}
 
-[tools.setuptools.package-data]
-"m3py.selenography" = ["data/*.prj"]
-
-[tools.setuptools.packages.find]
-where = ["src"]
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

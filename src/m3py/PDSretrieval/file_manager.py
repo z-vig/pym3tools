@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import shutil
 import re
+from typing import Optional
 
 # Dependencies
 import h5py as h5  # type: ignore
@@ -54,10 +55,10 @@ class M3FileManager:
         self,
         root: str | os.PathLike,
         data_id: str,
+        cache_name: Optional[str] = None,
         reset_cache: bool = False
     ):
         self.root = Path(root, data_id)
-        self.cache = Path(self.root, "pipeline_cache.hdf5")
         self.data_ID_long = data_id
         self.data_ID = re.findall(FileRetrievalPatterns.short_id, data_id)[0]
         self.acq_type = re.findall(FileRetrievalPatterns.acq_type, data_id)[0]
@@ -73,6 +74,11 @@ class M3FileManager:
             self._initialize_directories(
                 Path(root, f"{self.data_ID_long}_urls.txt")
             )
+
+        if cache_name is None:
+            self.cache = Path(self.root, "pipeline_cache.hdf5")
+        else:
+            self.cache = Path(self.root, cache_name).with_suffix(".hdf5")
 
         if reset_cache:
             self._reset_cache()

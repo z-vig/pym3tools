@@ -40,7 +40,7 @@ def get_solar_correction_values(
             solar_distance_pattern, f.read()
         )[0])
 
-    if not np.allclose(solar_wvl, wvl):
+    if not np.allclose(solar_wvl, wvl[bbl]):
         raise SolarSpectrumReadError(
             "The solar spectrum wavelength values do not match the data"
             "wavelength values."

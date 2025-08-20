@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import tempfile as tf
+from typing import Tuple
 
 # Deendencies
 import rasterio as rio  # type: ignore
@@ -31,10 +32,10 @@ class TerrainModel(Step):
         self.aspect_path = aspect_path
         self._use_PDS = use_PDS_terrain_model
 
-    def _compute_obs_from_aligned_terrain(
+    def _get_aligned_slope_aspect(
         self,
         state: PipelineState
-    ) -> np.ndarray:
+    ) -> Tuple[np.ndarray, np.ndarray]:
         data_temp = tf.NamedTemporaryFile(suffix=".tif")
         aligned_slope_temp = tf.NamedTemporaryFile(suffix=".tif")
         aligned_aspect_temp = tf.NamedTemporaryFile(suffix=".tif")
@@ -79,9 +80,16 @@ class TerrainModel(Step):
             raise ValueError(f"Shape of the slope map ({aspect_map.shape}) "
                              f"does not match obs ({state.obs.shape})")
 
+        return slope_map, aspect_map
+
+    def run(self, state: PipelineState) -> PipelineState:
+
         m3geom = M3Geometry.from_obs(state.obs)
-        m3geom.slope = slope_map
-        m3geom.aspect = aspect_map
+
+        if not self._use_PDS:
+            slope_map, aspect_map = self._get_aligned_slope_aspect(state)
+            m3geom.slope = slope_map
+            m3geom.aspect = aspect_map
 
         m3geom.convert_to_rad()
         incidence_map = calc_i(m3geom)
@@ -89,21 +97,12 @@ class TerrainModel(Step):
         phase_map = calc_g(m3geom)
 
         new_obs = np.concat([
-                incidence_map[:, :, np.newaxis],
-                emission_map[:, :, np.newaxis],
-                phase_map[:, :, np.newaxis],
-                slope_map[:, :, np.newaxis],
-                aspect_map[:, :, np.newaxis]
-            ], axis=2)
-
-        return new_obs
-
-    def run(self, state: PipelineState) -> PipelineState:
-
-        if self._use_PDS:
-            new_obs = np.empty((*state.data.shape[:2], 5))
-        else:
-            new_obs = self._compute_obs_from_aligned_terrain(state)
+            incidence_map[:, :, np.newaxis],
+            emission_map[:, :, np.newaxis],
+            phase_map[:, :, np.newaxis],
+            m3geom.slope[:, :, np.newaxis],
+            m3geom.aspect[:, :, np.newaxis]
+        ], axis=2)
 
         new_state = PipelineState(
             data=state.data,
