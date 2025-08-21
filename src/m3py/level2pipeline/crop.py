@@ -53,7 +53,7 @@ class Crop(Step):
 
     def save(self, output: PipelineState) -> None:
         super().save(output)
-        with h5.File(self.manager.cache) as f:
+        with h5.File(self.manager.cache, "r+") as f:
             g = f[self.name]
             assert isinstance(g, h5.Group)
             g.attrs["bbox"] = [
