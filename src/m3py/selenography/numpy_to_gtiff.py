@@ -6,16 +6,14 @@ import tempfile as tf
 
 # Dependencies
 import numpy as np
-import rasterio as rio
-from rasterio.crs import CRS
+import rasterio as rio  # type: ignore
+from rasterio.crs import CRS  # type: ignore
 
 PathLike = Optional[str | os.PathLike | Path]
 
 
 def numpy_to_gtiff(
-    arr: np.ndarray,
-    crs: CRS,
-    dst_path: Optional[PathLike] = None
+    arr: np.ndarray, crs: CRS, dst_path: Optional[PathLike] = None
 ) -> Path:
     """
     Saves a numpy array to a file with a dummy geotransform [0,1,0,0,0,1,0] and
@@ -46,13 +44,11 @@ def numpy_to_gtiff(
         "count": arr.shape[2],
         "crs": crs,
         "transform": (0, 1, 0, 0, 0, 1, 0),
-        "nodata": -999
+        "nodata": -999,
     }
 
     if dst_path is None:
-        tempfile = tf.NamedTemporaryFile(
-            suffix=".tif", delete=False
-        )
+        tempfile = tf.NamedTemporaryFile(suffix=".tif", delete=False)
         tempfile.close()
         dst_path = Path(tempfile.name)
     else:
@@ -62,11 +58,13 @@ def numpy_to_gtiff(
         arr = arr[:, :, np.newaxis]
 
     if arr.ndim not in [2, 3]:
-        raise ValueError(f"Array shape of {arr.shape} is invalid. Wrong number"
-                         "of dimensions. It must be either 2 or 3.")
+        raise ValueError(
+            f"Array shape of {arr.shape} is invalid. Wrong number"
+            "of dimensions. It must be either 2 or 3."
+        )
 
     with rio.open(dst_path, "w", **profile) as dst:
-        for i in range(1, arr.shape[2]+1):
-            dst.write(arr[:, :, i-1], i)
+        for i in range(1, arr.shape[2] + 1):
+            dst.write(arr[:, :, i - 1], i)
 
     return dst_path

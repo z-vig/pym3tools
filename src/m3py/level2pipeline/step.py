@@ -17,7 +17,7 @@ PathLike = str | os.PathLike | Path
 
 
 @dataclass
-class PipelineState():
+class PipelineState:
     data: np.ndarray
     wvl: np.ndarray
     obs: np.ndarray
@@ -39,11 +39,9 @@ class Step:
         Toggles whether or not to save the data after the step is performed.
         Default is False.
     """
+
     def __init__(
-        self,
-        name: str,
-        enabled: bool = True,
-        save_output: bool = False
+        self, name: str, enabled: bool = True, save_output: bool = False
     ) -> None:
         self.name = name
         self.enabled = enabled
@@ -55,9 +53,9 @@ class Step:
 
     @property
     def manager(self) -> M3FileManager:
-        assert self._manager is not None, (
-            f"M3FileManager has not been set for step {self.name}"
-        )
+        assert (
+            self._manager is not None
+        ), f"M3FileManager has not been set for step {self.name}"
         return self._manager
 
     def run(self, state: PipelineState) -> PipelineState:
@@ -69,8 +67,8 @@ class Step:
         output.obs[output.obs == -999] = np.nan
         with h5.File(self.manager.cache, "r+") as f:
             g = f.create_group(self.name)
-            g.create_dataset("data", data=output.data, dtype='f4')
-            g.create_dataset("obs", data=output.obs, dtype='f4')
+            g.create_dataset("data", data=output.data, dtype="f4")
+            g.create_dataset("obs", data=output.obs, dtype="f4")
             g.attrs["wavelengths"] = output.wvl
 
         with open(self.manager.georef_dir.metageo, "w") as f:
@@ -97,7 +95,7 @@ class Step:
                 data=g["data"][...],  # type:ignore
                 wvl=g.attrs["wavelengths"],  # type:ignore
                 obs=g["obs"][...],  # type:ignore
-                georef=georef
+                georef=georef,
             )
 
             print(cached_state.data.shape, cached_state.obs.shape)

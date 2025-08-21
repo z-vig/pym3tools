@@ -21,12 +21,7 @@ class AffineDict(BaseModel):
 
     def to_affine(self) -> Affine:
         return Affine(
-            a=self.a,
-            b=self.b,
-            c=self.c,
-            d=self.d,
-            e=self.e,
-            f=self.f
+            a=self.a, b=self.b, c=self.c, d=self.d, e=self.e, f=self.f
         )
 
 
@@ -48,7 +43,7 @@ class GeorefData(BaseModel):
             width=0,
             geotransform=AffineDict(a=0, b=1, c=0, d=0, e=0, f=1),
             crs=DEFAULT_CRS,
-            nodata=-999
+            nodata=-999,
         )
 
     @classmethod
@@ -60,5 +55,8 @@ class GeorefData(BaseModel):
             width=arr.shape[1],
             geotransform=AffineDict(a=0, b=1, c=0, d=0, e=0, f=1),
             crs=DEFAULT_CRS,
-            nodata=-999
+            nodata=-999,
         )
+
+    def to_list(self):
+        return [self.row_offset, self.col_offset, self.height, self.width]
