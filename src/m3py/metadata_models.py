@@ -12,6 +12,11 @@ with prj_file.open() as f:
 
 
 class AffineDict(BaseModel):
+    """
+    Little wrapper around Affine() object to use the affine coefficients like
+    a dictionary.
+    """
+
     a: float
     b: float
     c: float

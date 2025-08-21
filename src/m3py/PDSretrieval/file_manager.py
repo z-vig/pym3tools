@@ -51,12 +51,13 @@ class M3FileManager:
     georef_dir: PathLike
         Georeferenced Directory. Contains all GeoTiff, georeferenced data.
     """
+
     def __init__(
         self,
         root: str | os.PathLike,
         data_id: str,
         cache_name: Optional[str] = None,
-        reset_cache: bool = False
+        reset_cache: bool = False,
     ):
         self.root = Path(root, data_id)
         self.data_ID_long = data_id
@@ -69,44 +70,41 @@ class M3FileManager:
         else:
             raise ValueError("Invalid Acquisition Type.")
 
+        if cache_name is None:
+            self.cache = Path(self.root, "pipeline_cache.hdf5")
+        else:
+            self.cache = Path(self.root, cache_name).with_suffix(".hdf5")
+
         if Path(root, f"{self.data_ID_long}_urls.txt").is_file():
             print("Initializing new stripe directory...")
             self._initialize_directories(
                 Path(root, f"{self.data_ID_long}_urls.txt")
             )
 
-        if cache_name is None:
-            self.cache = Path(self.root, "pipeline_cache.hdf5")
-        else:
-            self.cache = Path(self.root, cache_name).with_suffix(".hdf5")
-
         if reset_cache:
             self._reset_cache()
 
         self.pds_dir = PDSDir(Path(self.root, "pds_data"), self.data_ID_long)
         self.cal_dir = CalDir(Path(self.root, "cal_data"), self.data_ID_long)
-        self.georef_dir = GeorefDir(Path(self.root, "georef_data"),
-                                    self.data_ID_long)
+        self.georef_dir = GeorefDir(
+            Path(self.root, "georef_data"), self.data_ID_long
+        )
 
     def _initialize_directories(self, urls_file: os.PathLike):
         Path(self.root).mkdir()
 
-        dir_names = [
-            "pds_data",
-            "cal_data",
-            "georef_data"
-        ]
+        dir_names = ["pds_data", "cal_data", "georef_data"]
 
         for i in dir_names:
             Path(self.root, i).mkdir()
 
         shutil.copyfile(
             urls_file,
-            Path(self.root, "pds_data", f"{self.data_ID_long}_urls.txt")
+            Path(self.root, "pds_data", f"{self.data_ID_long}_urls.txt"),
         )
         shutil.move(
             urls_file,
-            Path(self.root, "cal_data", f"{self.data_ID_long}_urls.txt")
+            Path(self.root, "cal_data", f"{self.data_ID_long}_urls.txt"),
         )
 
         self._reset_cache()
