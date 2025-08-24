@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 import tempfile as tf
-from typing import Tuple
+from typing import Tuple, Optional
 
 # Deendencies
 import rasterio as rio  # type: ignore
@@ -22,20 +22,20 @@ class TerrainModel(Step):
     def __init__(
         self,
         name: str,
-        slope_path: PathLike,
-        aspect_path: PathLike,
-        use_PDS_terrain_model: bool = False,
-        **kwargs
+        slope_path: Optional[PathLike] = None,
+        aspect_path: Optional[PathLike] = None,
+        **kwargs,
     ) -> None:
         super().__init__(name, **kwargs)
         self.slope_path = slope_path
         self.aspect_path = aspect_path
-        self._use_PDS = use_PDS_terrain_model
 
     def _get_aligned_slope_aspect(
-        self,
-        state: PipelineState
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        self, state: PipelineState
+    ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+        if (self.slope_path is None) or (self.aspect_path is None):
+            return None
+
         data_temp = tf.NamedTemporaryFile(suffix=".tif")
         aligned_slope_temp = tf.NamedTemporaryFile(suffix=".tif")
         aligned_aspect_temp = tf.NamedTemporaryFile(suffix=".tif")
@@ -51,19 +51,26 @@ class TerrainModel(Step):
             "height": state.data.shape[0],
             "count": 1,
             "crs": state.georef.crs,
-            "transform": state.georef.geotransform.to_affine()
+            "transform": state.georef.geotransform.to_affine(),
         }
 
         with rio.open(data_temp.name, "w", **profile) as ds:
             ds.write(state.data[:, :, 0], 1)
 
-        align_pixels(
-            data_temp.name, self.slope_path, dst_path=aligned_slope_temp.name
-        )
+        if isinstance(self.slope_path, str) and isinstance(
+            self.aspect_path, str
+        ):
+            align_pixels(
+                data_temp.name,
+                self.slope_path,
+                dst_path=aligned_slope_temp.name,
+            )
 
-        align_pixels(
-            data_temp.name, self.aspect_path, dst_path=aligned_aspect_temp.name
-        )
+            align_pixels(
+                data_temp.name,
+                self.aspect_path,
+                dst_path=aligned_aspect_temp.name,
+            )
 
         with rio.open(aligned_slope_temp.name, "r", driver="GTiff") as ds:
             slope_map = ds.read()
@@ -74,11 +81,15 @@ class TerrainModel(Step):
         aspect_map = aspect_map[0, :, :]
 
         if slope_map.shape[:2] != state.obs.shape[:2]:
-            raise ValueError(f"Shape of the slope map ({slope_map.shape}) "
-                             f"does not match obs ({state.obs.shape})")
+            raise ValueError(
+                f"Shape of the slope map ({slope_map.shape}) "
+                f"does not match obs ({state.obs.shape})"
+            )
         if aspect_map.shape[:2] != state.obs.shape[:2]:
-            raise ValueError(f"Shape of the slope map ({aspect_map.shape}) "
-                             f"does not match obs ({state.obs.shape})")
+            raise ValueError(
+                f"Shape of the slope map ({aspect_map.shape}) "
+                f"does not match obs ({state.obs.shape})"
+            )
 
         return slope_map, aspect_map
 
@@ -86,8 +97,11 @@ class TerrainModel(Step):
 
         m3geom = M3Geometry.from_obs(state.obs)
 
-        if not self._use_PDS:
-            slope_map, aspect_map = self._get_aligned_slope_aspect(state)
+        maps = self._get_aligned_slope_aspect(state)
+        if maps is None:
+            pass
+        else:
+            slope_map, aspect_map = maps
             m3geom.slope = slope_map
             m3geom.aspect = aspect_map
 
@@ -96,19 +110,19 @@ class TerrainModel(Step):
         emission_map = calc_e(m3geom)
         phase_map = calc_g(m3geom)
 
-        new_obs = np.concat([
-            incidence_map[:, :, np.newaxis],
-            emission_map[:, :, np.newaxis],
-            phase_map[:, :, np.newaxis],
-            m3geom.slope[:, :, np.newaxis],
-            m3geom.aspect[:, :, np.newaxis]
-        ], axis=2)
+        new_obs = np.concat(
+            [
+                incidence_map[:, :, np.newaxis],
+                emission_map[:, :, np.newaxis],
+                phase_map[:, :, np.newaxis],
+                m3geom.slope[:, :, np.newaxis],
+                m3geom.aspect[:, :, np.newaxis],
+            ],
+            axis=2,
+        )
 
         new_state = PipelineState(
-            data=state.data,
-            wvl=state.wvl,
-            obs=new_obs,
-            georef=state.georef
+            data=state.data, wvl=state.wvl, obs=new_obs, georef=state.georef
         )
 
         return new_state
