@@ -7,6 +7,7 @@ import re
 
 # Dependencies
 import numpy as np
+import h5py as h5  # type: ignore
 
 # Relative Imports
 from .step import Step, PipelineState
@@ -35,13 +36,12 @@ time_ranges: Mapping[str, TimeRange] = {
     "cold3": (datetime(2009, 7, 12, 0, 0, 0), datetime(2009, 8, 17, 0, 0, 0)),
     "warm1": (datetime(2008, 11, 18, 0, 0, 0), datetime(2009, 1, 19, 0, 0, 0)),
     "warm2": (datetime(2009, 5, 13, 0, 0, 0), datetime(2009, 5, 17, 0, 0, 0)),
-    "warm3": (datetime(2009, 5, 20, 0, 0, 0), datetime(2009, 7, 10, 0, 0, 0))
+    "warm3": (datetime(2009, 5, 20, 0, 0, 0), datetime(2009, 7, 10, 0, 0, 0)),
 }
 
 
 def check_instrument_temp(
-    acq_time: datetime,
-    manager: M3FileManager
+    acq_time: datetime, manager: M3FileManager
 ) -> PathLike:
     temperature_check: Optional[str] = None
     for k, v in time_ranges.items():
@@ -82,9 +82,9 @@ class StatisticalPolish(Step):
             r"_\w{4}_\w{3}_\d.TAB)\""
         )
         with open(self.manager.pds_dir.l2.lbl) as f:
-            stat_pol_file_check = re.findall(
-                acq_time_check_pattern, f.read()
-            )[0]
+            stat_pol_file_check = re.findall(acq_time_check_pattern, f.read())[
+                0
+            ]
 
         if stat_pol_path.name != stat_pol_file_check:
             raise StatisticalPolishFileError(
@@ -100,11 +100,10 @@ class StatisticalPolish(Step):
 
         with open(stat_pol_path) as f:
             data_array = np.array(
-                re.findall(stat_pol_tab_pattern, f.read()),
-                dtype=np.float32
+                re.findall(stat_pol_tab_pattern, f.read()), dtype=np.float32
             )
             stat_pol_wvl = data_array[bbl, 0]
-            stat_pol_coefs = data_array[bbl, 1]
+            self.stat_pol_coefs = data_array[bbl, 1]
 
         if not np.allclose(stat_pol_wvl, state.wvl):
             raise StatisticalPolishFileError(
@@ -112,13 +111,22 @@ class StatisticalPolish(Step):
                 "file do not match the data wavelengths."
             )
 
-        statisical_polish_applied = state.data * stat_pol_coefs[None, None, :]
+        statisical_polish_applied = (
+            state.data * self.stat_pol_coefs[None, None, :]
+        )
 
         new_state = PipelineState(
             data=statisical_polish_applied,
             wvl=state.wvl,
             obs=state.obs,
-            georef=state.georef
+            georef=state.georef,
         )
 
         return new_state
+
+    def save(self, output: PipelineState):
+        super().save(output)
+        with h5.File(self.manager.cache, "r+") as f:
+            g = f[self.name]
+            assert isinstance(g, h5.Group)
+            g.attrs["statistical_polish_coefs"] = self.stat_pol_coefs

@@ -21,6 +21,7 @@ class Window:
     The user will specify the bottom left row (X) and column (Y) of the window
     as well as the width and height as shown below:
     """
+
     X: int
     Y: int
     W: int
@@ -41,9 +42,9 @@ def read_m3(
     hdrlen = getattr(data_format, acq_type).header_length
 
     dtype_dict: Mapping[str, Tuple[type, int]] = {
-        "<d": (np.float64, 64//8),
-        "<f": (np.float32, 32//8),
-        "<h": (np.int16, 16//8)
+        "<d": (np.float64, 64 // 8),
+        "<f": (np.float32, 32 // 8),
+        "<h": (np.int16, 16 // 8),
     }
 
     numpy_dtype, nbytes = dtype_dict.get(dtype, (None, None))
@@ -59,12 +60,12 @@ def read_m3(
 
     start_row = window.Y
     col_offset = hdrlen + (window.X * nbands * nbytes)
-    start_byte = (start_row * full_col_bytes)
+    start_byte = start_row * full_col_bytes
     col_end_buffer = (ncols - (window.X + window.W)) * nbytes
 
     # Validating Window
-    xbounds_chk = (window.X + window.H) > total_rows
-    ybounds_chk = (window.Y + window.W) > ncols
+    xbounds_chk = (window.Y + window.H) > total_rows
+    ybounds_chk = (window.X + window.W) > ncols
     if xbounds_chk and not ybounds_chk:
         raise ValueError("Window does not fit within X bounds.")
     elif ybounds_chk and not xbounds_chk:
@@ -99,7 +100,7 @@ def read_m3(
 def get_wavelengths(
     file_config: M3FileManager | None = None,
     rfl_hdr: Optional[pathlike] = None,
-    acq_type: Optional[str] = None
+    acq_type: Optional[str] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns a list of wavelengths from reflectance header file.
@@ -119,32 +120,33 @@ def get_wavelengths(
         acq = file_config.acq_type
     else:
         if rfl_hdr is None or acq_type is None:
-            raise ValueError("Must provide both rfl_hdr and acq_type if no"
-                             "file_config.")
+            raise ValueError(
+                "Must provide both rfl_hdr and acq_type if no" "file_config."
+            )
         rfl_hdr_path = Path(rfl_hdr)
         acq = acq_type
 
         assert isinstance(rfl_hdr_path, Path)
         assert acq in ("global", "targeted")
 
-    if acq == 'global':
+    if acq == "global":
         loc_key = "wavelength = {"
-    elif acq == 'targeted':
+    elif acq == "targeted":
         loc_key = "target wavelengths = {"
     else:
-        raise ValueError(f"{acq} is an invalid acq_type. Must be "
-                         "either global or targeted.")
+        raise ValueError(
+            f"{acq} is an invalid acq_type. Must be "
+            "either global or targeted."
+        )
     bbl_key = "bbl = {"  # Band Bands List
 
-    def parse_list(
-        file_read: str,
-        start_string: str
-    ) -> Sequence[float | int]:
+    def parse_list(file_read: str, start_string: str) -> Sequence[float | int]:
         idx_start = file_read.find(start_string)
         idx_end = file_read.find("}", idx_start)
         str_list = file_read[idx_start:idx_end].split("\n")[1:]
-        num_list = [float(i.replace(" ", "").replace(",", ""))
-                    for i in str_list]
+        num_list = [
+            float(i.replace(" ", "").replace(",", "")) for i in str_list
+        ]
         return num_list
 
     with open(rfl_hdr_path, "r") as f:

@@ -20,13 +20,18 @@ def get_m3_id(input_string: str) -> list | str | None:
 
 
 @dataclass
-class FileRetrievalPatterns():
+class FileRetrievalPatterns:
     level0: re.Pattern = re.compile(
         f"{M3_PDS_ROOT}"
         r"CH1M3_000(?:1|2)/DATA/\d{8}_\d{8}/\d{6}/L0/"
         rf"{DATA_ID_PATTERN}_V01_L0.(?:HDR|IMG|LBL)"
     )
-    level1: re.Pattern = re.compile(
+    level1_v2: re.Pattern = re.compile(
+        f"{M3_PDS_ROOT}"
+        r"CH1M3_0001/DATA/\d{8}_\d{8}/\d{6}/L1B/"
+        rf"{DATA_ID_PATTERN}_V02_(?:L1B|LOC|OBS|RDN).(?:HDR|IMG|LBL|hdr)"
+    )
+    level1_v3: re.Pattern = re.compile(
         f"{M3_PDS_ROOT}"
         r"CH1M3_0003/DATA/\d{8}_\d{8}/\d{6}/L1B/"
         rf"{DATA_ID_PATTERN}_V03_(?:L1B|LOC|OBS|RDN).(?:HDR|IMG|LBL|hdr)"
@@ -37,12 +42,10 @@ class FileRetrievalPatterns():
         rf"{DATA_ID_PATTERN}_V01_(?:L2|RFL|SUP).(?:HDR|IMG|LBL|hdr)"
     )
     global_caldata: re.Pattern = re.compile(
-        f"{M3_PDS_ROOT}"
-        r"CH1M3_0004/CALIB/M3G\d{8}_RFL_.*"
+        f"{M3_PDS_ROOT}" r"CH1M3_0004/CALIB/M3G\d{8}_RFL_.*"
     )
     targeted_caldata: re.Pattern = re.compile(
-        f"{M3_PDS_ROOT}"
-        r"CH1M3_0004/CALIB/M3T\d{8}_RFL_.*"
+        f"{M3_PDS_ROOT}" r"CH1M3_0004/CALIB/M3T\d{8}_RFL_.*"
     )
     acq_type: re.Pattern = re.compile(r"M3(G|T)\d{8}T\d{6}")
     short_id: re.Pattern = re.compile(r"M3\w\d{8}T(\d{6})")

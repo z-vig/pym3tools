@@ -36,6 +36,11 @@ class Crop(Step):
         state.georef.height = int(height)
         state.georef.width = int(width)
 
+        state.georef.left_bound = self.bbox.left
+        state.georef.bottom_bound = self.bbox.bottom
+        state.georef.right_bound = self.bbox.right
+        state.georef.top_bound = self.bbox.top
+
         self._new_georef = state.georef
 
         new_state = PipelineState(
@@ -56,10 +61,5 @@ class Crop(Step):
         with h5.File(self.manager.cache, "r+") as f:
             g = f[self.name]
             assert isinstance(g, h5.Group)
-            g.attrs["bbox"] = [
-                self.bbox.left,
-                self.bbox.bottom,
-                self.bbox.right,
-                self.bbox.top,
-            ]
-            g.attrs["window"] = self._new_georef.to_list()
+            g.attrs["bbox"] = self._new_georef.bbox_to_list()
+            g.attrs["window"] = self._new_georef.window_to_list()

@@ -5,8 +5,8 @@ from time import sleep
 from typing import Mapping
 
 # Dependencies
-import requests
-from tqdm import tqdm
+import requests  # type: ignore
+from tqdm import tqdm  # type: ignore
 
 
 def retrieve_urls(url_dict: Mapping[str, str | os.PathLike]):
@@ -25,9 +25,7 @@ def retrieve_urls(url_dict: Mapping[str, str | os.PathLike]):
 
 
 def download_with_resume_and_retries(
-    url: str,
-    filename: str | os.PathLike,
-    max_retries=5, backoff=5
+    url: str, filename: str | os.PathLike, max_retries=5, backoff=5
 ):
     filename = Path(filename)
     attempt = 0
@@ -35,12 +33,14 @@ def download_with_resume_and_retries(
     while attempt < max_retries:
         try:
             # Determine how much we already downloaded
-            downloaded = os.path.getsize(filename) \
-                if os.path.exists(filename) else 0
+            downloaded = (
+                os.path.getsize(filename) if os.path.exists(filename) else 0
+            )
 
             # Send a request with the Range header to resume download
-            headers = {"Range": f"bytes={downloaded}-"} \
-                if downloaded > 0 else {}
+            headers = (
+                {"Range": f"bytes={downloaded}-"} if downloaded > 0 else {}
+            )
 
             with requests.get(
                 url, headers=headers, stream=True, timeout=30
@@ -49,20 +49,26 @@ def download_with_resume_and_retries(
 
                 # Total file size (from Content-Range if available)
                 total_size = (
-                    int(r.headers.get("Content-Range",
-                                      "bytes */0").split("/")[-1])
+                    int(
+                        r.headers.get("Content-Range", "bytes */0").split("/")[
+                            -1
+                        ]
+                    )
                     if "Content-Range" in r.headers
                     else int(r.headers.get("Content-Length", 0)) + downloaded
                 )
 
                 mode = "ab" if downloaded > 0 else "wb"
-                with open(filename, mode) as f, tqdm(
-                    total=total_size,
-                    initial=downloaded,
-                    unit="iB",
-                    unit_scale=True,
-                    desc=filename.__str__(),
-                ) as bar:
+                with (
+                    open(filename, mode) as f,
+                    tqdm(
+                        total=total_size,
+                        initial=downloaded,
+                        unit="iB",
+                        unit_scale=True,
+                        desc=filename.__str__(),
+                    ) as bar,
+                ):
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)

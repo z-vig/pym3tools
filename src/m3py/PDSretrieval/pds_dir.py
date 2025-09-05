@@ -12,7 +12,7 @@ type pathlike = str | os.PathLike
 
 
 @dataclass
-class PDSDataFiles():
+class PDSDataFiles:
     root: pathlike
     lbl: pathlike
     level: int = field(init=False)
@@ -27,18 +27,18 @@ class PDSDataFiles():
             raise ValueError(f"{self.level} is not a valid processing level.")
 
     def __str__(self) -> str:
-        tree_string = (
-            f"{Path(self.root).name}\n"
-        )
+        tree_string = f"{Path(self.root).name}\n"
         n = 1
         for k, v in vars(self).items():
             n += 1
             if (k not in ("root", "level")) and (n != len(vars(self))):
-                tree_string += "\u2502   \u2502   \u251c\u2500\u2500\u2500" \
-                               f"{v.name}\n"
+                tree_string += (
+                    "\u2502   \u2502   \u251c\u2500\u2500\u2500" f"{v.name}\n"
+                )
             elif (k not in ("root", "level")) and (n == len(vars(self))):
-                tree_string += "\u2502   \u2502   \u2514\u2500\u2500\u2500" \
-                               f"{v.name}"
+                tree_string += (
+                    "\u2502   \u2502   \u2514\u2500\u2500\u2500" f"{v.name}"
+                )
         return tree_string
 
 
@@ -86,10 +86,7 @@ class PDSDir:
     l2: L2Files
 
     def __init__(
-        self,
-        parent: os.PathLike,
-        data_id: str,
-        verbose: bool = False
+        self, parent: os.PathLike, data_id: str, verbose: bool = False
     ):
         self.root = Path(parent)
         self.retrieval = Path(self.root, f"{data_id}_urls.txt")
@@ -97,25 +94,29 @@ class PDSDir:
         with open(self.retrieval, "r") as f:
             fread = f.read()
             l0_urls = re.findall(FileRetrievalPatterns.level0, fread)
-            l1_urls = re.findall(FileRetrievalPatterns.level1, fread)
+            l1_urls = re.findall(FileRetrievalPatterns.level1_v3, fread)
             l2_urls = re.findall(FileRetrievalPatterns.level2, fread)
 
         for urls, lbl, objtype in zip(
             [l0_urls, l1_urls, l2_urls],
             ["Level 0", "Level 1", "Level 2"],
-            [L0Files, L1Files, L2Files]
+            [L0Files, L1Files, L2Files],
         ):
             save_dir = Path(self.root, f"L{lbl[-1]}")
             # This contains all files with PDSDataFiles kwargs as the keys.
-            constructor_dict = {'root': save_dir}
+            constructor_dict = {"root": save_dir}
             for i in urls:
                 base_kw = Path(i).suffix[1:].lower()
-                cube_type = Path(i).stem[Path(i).stem.find("_", 19)+1:].lower()
+                cube_type = (
+                    Path(i)
+                    .stem[Path(i).stem.find("_", 19) + 1 :]  # noqa
+                    .lower()
+                )
                 if cube_type in ("l0", "l1b", "l2"):
                     cube_type = ""
                 else:
                     cube_type = cube_type + "_"
-                kw = cube_type+base_kw
+                kw = cube_type + base_kw
                 constructor_dict[kw] = Path(save_dir, Path(i).name)
             setattr(self, f"l{lbl[-1]}", objtype(**constructor_dict))
 
@@ -130,11 +131,8 @@ class PDSDir:
             retrieve_urls(file_path_dict)
 
     def __str__(self):
-        tree_string = (
-            f"{Path(self.root).name}\n"
-        )
+        tree_string = f"{Path(self.root).name}\n"
         for k, v in vars(self).items():
             if k not in ("root"):
-                tree_string += "\u2502   \u251c\u2500\u2500\u2500" \
-                               f"{v}\n"
+                tree_string += "\u2502   \u251c\u2500\u2500\u2500" f"{v}\n"
         return tree_string

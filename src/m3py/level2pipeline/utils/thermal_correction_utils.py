@@ -68,37 +68,56 @@ def find_wvl(wvls: np.ndarray, targetwvl: float) -> Tuple[int, float]:
 
 
 def linear_projection(
-    data: np.ndarray,
-    refwvl: RefWvlSet,
-    initial: bool
+    data: np.ndarray, refwvl: RefWvlSet, initial: bool
 ) -> np.ndarray:
     if initial:
-        y_proj = (((data[:, :, refwvl.B.index] - data[:, :, refwvl.A.index]) /
-                  (refwvl.B.actual - refwvl.A.actual)) *
-                  (refwvl.C.actual - refwvl.A.actual)) +\
-                  data[:, :, refwvl.A.index]
+        y_proj = (
+            (
+                (data[:, :, refwvl.B.index] - data[:, :, refwvl.A.index])
+                / (refwvl.B.target - refwvl.A.target)
+            )
+            * (refwvl.C.target - refwvl.A.target)
+        ) + data[:, :, refwvl.A.index]
     else:
-        y_proj = (((data[:, :, refwvl.E.index] - data[:, :, refwvl.D.index]) /
-                  (refwvl.E.actual - refwvl.D.actual)) *
-                  (refwvl.C.actual - refwvl.D.actual)) +\
-                  data[:, :, refwvl.D.index]
+        y_proj = (
+            (
+                (data[:, :, refwvl.E.index] - data[:, :, refwvl.D.index])
+                / (refwvl.E.actual - refwvl.D.actual)
+            )
+            * (refwvl.C.actual - refwvl.D.actual)
+        ) + data[:, :, refwvl.D.index]
     return y_proj
 
 
 # Calculation Functions
-def get_temp(B, e, w, F):
-    return (h * c / (w * k_b)) *\
-        (np.log(((2 * h * c**2 * e) / (F * B * w**5)) + 1))**-1
+def get_temp(B: np.ndarray, e, w: float, F: np.ndarray):
+    """
+    Gets the temperature given a spectral thermal component.
+
+    Parameters
+    ----------
+    B: Thermal component.
+    e: Emissivity (constant)
+    w: wavelength of calculation
+    F: solar spectrum
+    """
+    return (h * c / (w * k_b)) * (
+        np.log(((2 * h * c**2 * e) / ((B * 10**6 * F / np.pi) * w**5)) + 1)
+    ) ** -1
 
 
 def get_temp_photometric(B, e, w, F, phi):
-    return (h * c / (w * k_b)) *\
-        (np.log(((2 * h * c**2 * e * phi) / (F * B * w**5)) + 1))**-1
+    return (h * c / (w * k_b)) * (
+        np.log(
+            ((2 * h * c**2 * e) / ((F * B * 10**6 / (phi * np.pi)) * w**5)) + 1
+        )
+    ) ** -1
 
 
-def get_thermal_spectrum(wvl, temp, solar_spec, solar_dist):
-    B = ((2 * h * c**2) / (wvl ** 5)) *\
-        (1 / (np.exp((h * c) / (wvl * k_b * temp)) - 1))
-    F = 10**6 * solar_spec / np.pi
-    therm_spec = (B / F) * solar_dist**2
+def get_thermal_spectrum(wvl, temp, e, solar_spec, solar_dist):
+    B = ((2 * h * c**2) / (wvl**5)) * (
+        1 / (np.exp((h * c) / (wvl * k_b * temp)) - 1)
+    )
+    F = solar_spec
+    therm_spec = (solar_dist**2 * e * B * 10**-6 * np.pi) / F
     return therm_spec

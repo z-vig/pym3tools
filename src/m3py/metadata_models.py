@@ -38,6 +38,10 @@ class GeorefData(BaseModel):
     geotransform: AffineDict
     crs: str
     nodata: int
+    left_bound: float
+    bottom_bound: float
+    right_bound: float
+    top_bound: float
 
     @classmethod
     def empty(cls) -> "GeorefData":
@@ -49,6 +53,10 @@ class GeorefData(BaseModel):
             geotransform=AffineDict(a=0, b=1, c=0, d=0, e=0, f=1),
             crs=DEFAULT_CRS,
             nodata=-999,
+            left_bound=0,
+            bottom_bound=-180,
+            right_bound=-179,
+            top_bound=180,
         )
 
     @classmethod
@@ -61,7 +69,19 @@ class GeorefData(BaseModel):
             geotransform=AffineDict(a=0, b=1, c=0, d=0, e=0, f=1),
             crs=DEFAULT_CRS,
             nodata=-999,
+            left_bound=0,
+            bottom_bound=-180,
+            right_bound=-179,
+            top_bound=180,
         )
 
-    def to_list(self):
+    def window_to_list(self):
         return [self.row_offset, self.col_offset, self.height, self.width]
+
+    def bbox_to_list(self):
+        return [
+            self.left_bound,
+            self.bottom_bound,
+            self.right_bound,
+            self.top_bound,
+        ]

@@ -27,8 +27,10 @@ class TerrainModel(Step):
         **kwargs,
     ) -> None:
         super().__init__(name, **kwargs)
-        self.slope_path = slope_path
-        self.aspect_path = aspect_path
+        self.slope_path = str(slope_path) if slope_path is not None else None
+        self.aspect_path = (
+            str(aspect_path) if aspect_path is not None else None
+        )
 
     def _get_aligned_slope_aspect(
         self, state: PipelineState
@@ -71,6 +73,8 @@ class TerrainModel(Step):
                 self.aspect_path,
                 dst_path=aligned_aspect_temp.name,
             )
+        else:
+            raise ValueError("Slope and Aspect paths are not strings.")
 
         with rio.open(aligned_slope_temp.name, "r", driver="GTiff") as ds:
             slope_map = ds.read()

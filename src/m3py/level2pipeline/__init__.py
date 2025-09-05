@@ -12,6 +12,7 @@ from .terrain_model import TerrainModel
 from .solar_spectrum_removal import SolarSpectrumRemoval
 from .statistical_polish import StatisticalPolish
 from .clark_thermal_correction import ClarkThermalCorrection
+from .photometric_correction import PhotometricCorrection
 from .standard_pipelines import run_pipeline
 from . import utils
 
@@ -23,6 +24,7 @@ __all__ = [
     "SolarSpectrumRemoval",
     "StatisticalPolish",
     "ClarkThermalCorrection",
+    "PhotometricCorrection",
     "utils",
     "run_pipeline",
 ]

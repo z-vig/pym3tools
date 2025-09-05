@@ -6,6 +6,7 @@ from tempfile import NamedTemporaryFile
 # Dependencies
 import numpy as np
 import rasterio as rio  # type: ignore
+import yaml
 
 # Relative Imports
 from .step import Step, PipelineState
@@ -35,7 +36,7 @@ class Georeference(Step):
             self.manager.georef_dir.gcps,
             rdn_temp_file.name,
             input_array_offsets=offsets,
-            verbose=self._verbose
+            verbose=self._verbose,
         )
 
         apply_gcps(
@@ -43,7 +44,7 @@ class Georeference(Step):
             self.manager.georef_dir.gcps,
             obs_temp_file.name,
             input_array_offsets=offsets,
-            verbose=self._verbose
+            verbose=self._verbose,
         )
 
         with rio.open(rdn_temp_file.name, "r", driver="GTiff") as ds:
@@ -55,7 +56,7 @@ class Georeference(Step):
                 c=gtrans.c,
                 d=gtrans.d,
                 e=gtrans.e,
-                f=gtrans.f
+                f=gtrans.f,
             )
             state.georef.crs = ds.crs.to_wkt()
 
@@ -69,7 +70,12 @@ class Georeference(Step):
             data=cropped_rdn,
             wvl=state.wvl,
             obs=cropped_obs,
-            georef=state.georef
+            georef=state.georef,
         )
 
         return new_state
+
+    def save(self, output: PipelineState) -> None:
+        super().save(output)
+        with open(self.manager.georef_dir.metageo, "w") as f:
+            yaml.dump(output.georef.model_dump(), f)
