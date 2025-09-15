@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 from typing import Optional
+from enum import Enum
 from dataclasses import dataclass
 
 # Dependencies
@@ -16,12 +17,45 @@ from m3py.metadata_models import GeorefData
 PathLike = str | os.PathLike | Path
 
 
+class StepCompletionState(Enum):
+    Incomplete = 0
+    Complete = 1
+    Cached = 2
+    LoadedFromCache = 3
+
+
+@dataclass
+class PipelineFlags:
+    cropped: StepCompletionState
+    georeferenced: StepCompletionState
+    external_DEM_used: StepCompletionState
+    IoverF_corrected: StepCompletionState
+    statistical_polishing_applied: StepCompletionState
+    thermal_removed: StepCompletionState
+    photometrically_corrected: StepCompletionState
+    converted_to_ssa: StepCompletionState
+
+    @classmethod
+    def default(cls):
+        return cls(
+            cropped=StepCompletionState.Incomplete,
+            georeferenced=StepCompletionState.Incomplete,
+            external_DEM_used=StepCompletionState.Incomplete,
+            IoverF_corrected=StepCompletionState.Incomplete,
+            statistical_polishing_applied=StepCompletionState.Incomplete,
+            thermal_removed=StepCompletionState.Incomplete,
+            photometrically_corrected=StepCompletionState.Incomplete,
+            converted_to_ssa=StepCompletionState.Incomplete,
+        )
+
+
 @dataclass
 class PipelineState:
     data: np.ndarray
     wvl: np.ndarray
     obs: np.ndarray
     georef: GeorefData
+    flags: PipelineFlags
 
 
 class Step:
@@ -70,6 +104,10 @@ class Step:
             g.create_dataset("data", data=output.data, dtype="f4")
             g.create_dataset("obs", data=output.obs, dtype="f4")
             g.attrs["wavelengths"] = output.wvl
+            g.attrs["pipeline_flags"] = [
+                getattr(output.flags, i.name).value
+                for i in output.flags.__dataclass_fields__.values()
+            ]
 
         with open(self.manager.georef_dir.metageo, "w") as f:
             yaml.dump(output.georef.model_dump(), f)
@@ -96,6 +134,12 @@ class Step:
                 wvl=g.attrs["wavelengths"],  # type:ignore
                 obs=g["obs"][...],  # type:ignore
                 georef=georef,
+                flags=PipelineFlags(
+                    *[
+                        StepCompletionState(i)
+                        for i in g.attrs["pipeline_flags"][...]  # type: ignore
+                    ]
+                ),
             )
 
             print(cached_state.data.shape, cached_state.obs.shape)

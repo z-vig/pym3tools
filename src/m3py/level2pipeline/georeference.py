@@ -9,7 +9,7 @@ import rasterio as rio  # type: ignore
 import yaml
 
 # Relative Imports
-from .step import Step, PipelineState
+from .step import Step, PipelineState, StepCompletionState
 
 # Top-Level Imports
 from m3py.selenography.gcp_utils import apply_gcps
@@ -66,11 +66,15 @@ class Georeference(Step):
         cropped_rdn = np.transpose(cropped_rdn, (1, 2, 0))
         cropped_obs = np.transpose(cropped_obs, (1, 2, 0))
 
+        new_flags = state.flags
+        new_flags.georeferenced = StepCompletionState.Complete
+
         new_state = PipelineState(
             data=cropped_rdn,
             wvl=state.wvl,
             obs=cropped_obs,
             georef=state.georef,
+            flags=new_flags,
         )
 
         return new_state

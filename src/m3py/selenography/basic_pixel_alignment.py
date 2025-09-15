@@ -59,6 +59,6 @@ def align_pixels(
                     src_crs=ref.crs,
                     dst_transform=transform,
                     dst_crs=ref.crs,
-                    resampling=Resampling.bilinear,
+                    resampling=Resampling.nearest,
                     dst_nodata=-999,
                 )

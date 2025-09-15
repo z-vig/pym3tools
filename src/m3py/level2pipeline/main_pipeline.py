@@ -7,7 +7,7 @@ from typing import Sequence
 # from rasterio.coords import BoundingBox
 
 # Relative Imports
-from .step import Step, PipelineState
+from .step import Step, PipelineState, PipelineFlags
 
 # Top-Level Imports
 from m3py.metadata_models import GeorefData
@@ -18,10 +18,12 @@ from m3py.formats import L1, OBS
 type PathType = str | os.PathLike
 
 
-class M3Level2Pipeline():
+class M3Level2Pipeline:
     """
-    Main pipeline controller for L1 to L2 M3 pipeline.
+    Main pipeline controller for L1 to L2 processing of M3 data from NASA's
+    Planetary Data System.
     """
+
     def __init__(self, steps: Sequence[Step], manager: M3FileManager) -> None:
         self.steps = steps
         for step in self.steps:
@@ -37,8 +39,9 @@ class M3Level2Pipeline():
         wvl = wvl[bbl]
 
         georef = GeorefData.from_numpy(data)
+        flags = PipelineFlags.default()
 
-        self.state = PipelineState(data, wvl, obs, georef)
+        self.state = PipelineState(data, wvl, obs, georef, flags)
 
     def run(self) -> PipelineState:
         state = self.state

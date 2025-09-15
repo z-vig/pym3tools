@@ -1,17 +1,17 @@
 # Standard Libraries
-from typing import Tuple, Optional
+from typing import Tuple
+from enum import Enum
 
 # Dependencies
 import numpy as np
-from scipy.interpolate import RegularGridInterpolator  # type: ignore
 import h5py as h5  # type: ignore
 from rasterio.coords import BoundingBox  # type: ignore
 
 # Relative Imports
-from .step import Step, PipelineState
-from .photometric_correction import (
+from .step import Step, PipelineState, StepCompletionState
+from .utils.photometric_correction_utils import (
     compute_f_alpha,
-    compute_limb_darkening_correction_factor,
+    cosine_correction,
 )
 from .utils.thermal_correction_utils import (
     RefWvlSet,
@@ -31,42 +31,11 @@ from m3py.io.read_m3_georef import read_m3_georef
 from m3py.formats.m3_data_format import SUP
 
 
-def get_geometry_correction(
-    state: PipelineState, rgi: RegularGridInterpolator
-) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Returns photometric correction factors and cosine incidence correction
-    factors.
-
-    Parameters
-    ----------
-    state: PipelineState
-        PipelineState object.
-    rgi: RegularGridInterpolator
-        Interpolation of the PDS-provided phase function.
-
-    Returns
-    -------
-    photo_coefs: np.ndarray
-        Photometric coefficients, normalized to 30, 0, 30.
-    cos_correction: np.ndarray
-        Cosine of the incidence angle per pixel.
-    """
-    # Phase Function Factor
-    f_alpha, f_alpha_norm = compute_f_alpha(
-        state.obs[:, :, 2], rgi, state.wvl.size
-    )
-
-    # Limb-Darkening Factor
-    ldf = compute_limb_darkening_correction_factor(state.obs)
-
-    photo_coefs = ldf[:, :, None] * f_alpha_norm
-
-    cos_correction = (
-        np.cos((np.pi / 180) * state.obs[:, :, 0])[:, :, None] * f_alpha
-    )
-
-    return photo_coefs, cos_correction
+class ThermalCorrectionMethod(Enum):
+    Clark = 0
+    Li_Milliken = 1
+    Shkuratov = 2
+    Wohler_Grumpe = 3
 
 
 class ClarkThermalCorrection(Step):
@@ -75,34 +44,23 @@ class ClarkThermalCorrection(Step):
         name,
         max_iterations: int = 12,
         use_pds_temperatures: bool = False,
-        georeferenced: Optional[bool] = None,
         **kwargs,
     ) -> None:
         super().__init__(name, **kwargs)
         self.max_iterations = max_iterations
         self.use_pds_temperatures = use_pds_temperatures
-        self.georef = georeferenced
+        self.method = ThermalCorrectionMethod.Clark
 
     def _load_context_variables(
         self, state: PipelineState
-    ) -> Tuple[
-        RefWvlSet, np.ndarray, np.ndarray, float, RegularGridInterpolator
-    ]:
+    ) -> Tuple[RefWvlSet, np.ndarray, np.ndarray, float]:
         reference_wvl = RefWvlSet.from_data(state.wvl)
 
         solar_spec, solar_wvl, solar_distance = get_solar_correction_values(
             self.manager
         )
 
-        f_alpha_rgi = get_phase_function_rgi(self.manager)
-
-        return (
-            reference_wvl,
-            solar_wvl,
-            solar_spec,
-            solar_distance,
-            f_alpha_rgi,
-        )
+        return (reference_wvl, solar_wvl, solar_spec, solar_distance)
 
     def _initial_temp_correction(
         self,
@@ -119,8 +77,6 @@ class ClarkThermalCorrection(Step):
             :, :, refwvl.C.index
         ] - linear_projection(state.data, refwvl, initial=True)
 
-        print(f"LOG: {initial_thermal_component[1031, 232]}")
-
         initial_thermal_component[initial_thermal_component < 0] = np.nan
 
         initial_emissivity = 1 - state.data[:, :, refwvl.A.index]
@@ -133,7 +89,6 @@ class ClarkThermalCorrection(Step):
             refwvl.C.actual * 10**-9,
             sol_spec[Fidx],
         )
-        print(f"LOG: {initial_temp[1031, 232]}")
 
         initial_thermal_spectra = get_thermal_spectrum(
             state.wvl[None, None, :] * 10**-9,
@@ -152,13 +107,15 @@ class ClarkThermalCorrection(Step):
 
     def run(self, state: PipelineState) -> PipelineState:
         # Pre-loading context variables
-        refwvl, sol_wvl, sol_spec, sol_dist, rgi = (
-            self._load_context_variables(state)
+        refwvl, sol_wvl, sol_spec, sol_dist = self._load_context_variables(
+            state
         )
 
         # Getting geometry correction factors
-        self.photo_coefs, self.cos_correction = get_geometry_correction(
-            state, rgi
+        self.cos_correction = cosine_correction(state.obs[:, :, 0])
+        rgi = get_phase_function_rgi(self.manager)
+        self.phase_function, _ = compute_f_alpha(
+            state.obs[:, :, 2], rgi, state.data.shape[-1]
         )
 
         # Creating temperature logging array
@@ -167,30 +124,25 @@ class ClarkThermalCorrection(Step):
         )
 
         if self.use_pds_temperatures:
-            if self.georef is None:
-                raise ValueError(
-                    "If using PDS Temperatures, `georeference` must be a bool."
-                )
             print(
                 "Skipping iterative temperature solution, using pre-defined"
                 " temperature values."
             )
-            window = Window(
-                state.georef.col_offset,
-                state.georef.col_offset,
-                state.georef.width,
-                state.georef.height,
-            )
-            bbox = BoundingBox(
-                left=state.georef.left_bound,
-                bottom=state.georef.bottom_bound,
-                right=state.georef.right_bound,
-                top=state.georef.top_bound,
-            )
-
-            if self.georef:
+            if state.flags.georeferenced:
+                bbox = BoundingBox(
+                    left=state.georef.left_bound,
+                    bottom=state.georef.bottom_bound,
+                    right=state.georef.right_bound,
+                    top=state.georef.top_bound,
+                )
                 pds_temps = read_m3_georef(self.manager, bbox, "SUP")[:, :, 1]
             else:
+                window = Window(
+                    state.georef.col_offset,
+                    state.georef.col_offset,
+                    state.georef.width,
+                    state.georef.height,
+                )
                 pds_temps = read_m3(
                     self.manager.pds_dir.l2.sup_img,
                     SUP,
@@ -215,11 +167,15 @@ class ClarkThermalCorrection(Step):
 
             self.temp_log[:, :, 0] = pds_temps
 
+            new_flags = state.flags
+            new_flags.thermal_removed = StepCompletionState.Complete
+
             new_state = PipelineState(
-                data=self.photo_coefs * (state.data - thermal_spec),
+                data=state.data - thermal_spec,
                 wvl=state.wvl,
                 obs=state.obs,
                 georef=state.georef,
+                flags=new_flags,
             )
             return new_state
 
@@ -233,12 +189,13 @@ class ClarkThermalCorrection(Step):
         self.temp_log[:, :, iter_counter] = initial_temp
 
         correction_exists = ~np.isnan(initial_thermal_removed)
-        self.final_correction[correction_exists] = (
-            initial_thermal_removed[correction_exists]
-            * self.photo_coefs[correction_exists]
-        )
+        self.final_correction[correction_exists] = initial_thermal_removed[
+            correction_exists
+        ]
 
-        next_step = initial_thermal_removed / self.cos_correction
+        next_step = initial_thermal_removed / (
+            self.cos_correction * self.phase_function
+        )
 
         while True:
             wvl_dependent_emiss = 1 - next_step
@@ -267,17 +224,18 @@ class ClarkThermalCorrection(Step):
 
             next_thermal_removed = state.data - next_thermal_spectra
 
-            next_step = next_thermal_removed / self.cos_correction
+            next_step = next_thermal_removed / (
+                self.cos_correction * self.phase_function
+            )
 
             iter_counter += 1
             print(f"Iteration Count: {iter_counter}")
 
             self.temp_log[:, :, iter_counter] = next_temp
             correction_exists = ~np.isnan(next_step)
-            self.final_correction[correction_exists] = (
-                next_thermal_removed[correction_exists]
-                * self.photo_coefs[correction_exists]
-            )
+            self.final_correction[correction_exists] = next_thermal_removed[
+                correction_exists
+            ]
             if iter_counter == self.max_iterations:
                 break
 
@@ -286,11 +244,15 @@ class ClarkThermalCorrection(Step):
             ):
                 break
 
+        new_flags = state.flags
+        new_flags.thermal_removed = StepCompletionState.Complete
+
         new_state = PipelineState(
             data=self.final_correction,
             wvl=state.wvl,
             obs=state.obs,
             georef=state.georef,
+            flags=new_flags,
         )
 
         return new_state
@@ -300,7 +262,5 @@ class ClarkThermalCorrection(Step):
         with h5.File(self.manager.cache, "r+") as f:
             g = f[self.name]
             assert isinstance(g, h5.Group)
-            g.create_dataset(
-                "photometric_coefficients", data=self.photo_coefs, dtype="f4"
-            )
             g.create_dataset("temp", data=self.temp_log, dtype="f4")
+            g.attrs["correction_method"] = self.method.value

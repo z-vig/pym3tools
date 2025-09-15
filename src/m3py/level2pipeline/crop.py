@@ -7,7 +7,7 @@ from rasterio.coords import BoundingBox  # type: ignore
 import h5py as h5  # type: ignore
 
 # Relative Imports
-from .step import Step, PipelineState
+from .step import Step, PipelineState, StepCompletionState
 
 # Top-Level Imports
 from m3py.io.read_m3 import read_m3
@@ -42,6 +42,8 @@ class Crop(Step):
         state.georef.top_bound = self.bbox.top
 
         self._new_georef = state.georef
+        new_flags = state.flags
+        new_flags.cropped = StepCompletionState.Complete
 
         new_state = PipelineState(
             data=cropped_data,
@@ -52,6 +54,7 @@ class Crop(Step):
                 :,
             ],
             georef=state.georef,
+            flags=new_flags,
         )
 
         return new_state

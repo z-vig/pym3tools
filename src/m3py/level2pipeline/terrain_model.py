@@ -9,7 +9,7 @@ import rasterio as rio  # type: ignore
 import numpy as np
 
 # Relative Imports
-from .step import Step, PipelineState
+from .step import Step, PipelineState, StepCompletionState
 from .utils.terrain_model_utils import calc_i, calc_e, calc_g, M3Geometry
 
 # Top-Level Imports
@@ -99,12 +99,15 @@ class TerrainModel(Step):
 
     def run(self, state: PipelineState) -> PipelineState:
 
+        new_flags = state.flags
+
         m3geom = M3Geometry.from_obs(state.obs)
 
         maps = self._get_aligned_slope_aspect(state)
         if maps is None:
             pass
         else:
+            new_flags.external_DEM_used = StepCompletionState.Complete
             slope_map, aspect_map = maps
             m3geom.slope = slope_map
             m3geom.aspect = aspect_map
@@ -126,7 +129,11 @@ class TerrainModel(Step):
         )
 
         new_state = PipelineState(
-            data=state.data, wvl=state.wvl, obs=new_obs, georef=state.georef
+            data=state.data,
+            wvl=state.wvl,
+            obs=new_obs,
+            georef=state.georef,
+            flags=new_flags,
         )
 
         return new_state

@@ -13,7 +13,10 @@ PathLike = Optional[str | os.PathLike | Path]
 
 
 def numpy_to_gtiff(
-    arr: np.ndarray, crs: CRS, dst_path: Optional[PathLike] = None
+    arr: np.ndarray,
+    crs: CRS,
+    gtrans: Optional[tuple[float, ...]] = None,
+    dst_path: Optional[PathLike] = None,
 ) -> Path:
     """
     Saves a numpy array to a file with a dummy geotransform [0,1,0,0,0,1,0] and
@@ -25,16 +28,21 @@ def numpy_to_gtiff(
         Array to save as GeoTiff.
     crs: CRS
         A rasterio CRS type. The array will be saved to this type.
+    gtrans: tuple of floats, optional
+        Geotransform to be applied. If None (default), a default geotransform
+        of (0, 1, 0, 0, 0, 1) will be used.
     dst_path: PathLike, optional
         Destination path. If None (default), the file will be saved as a temp
         file, and the name of the temp file will be returned. If the tempfile
-        is returned, it will exist indefinitely ubles deleted by another
+        is returned, it will exist indefinitely until deleted by another
         function.
 
     Returns
     -------
     Path
     """
+    if gtrans is None:
+        gtrans = (0, 1, 0, 0, 0, 1, 0)
 
     profile = {
         "driver": "GTiff",
@@ -43,7 +51,7 @@ def numpy_to_gtiff(
         "height": arr.shape[0],
         "count": arr.shape[2],
         "crs": crs,
-        "transform": (0, 1, 0, 0, 0, 1, 0),
+        "transform": gtrans,
         "nodata": -999,
     }
 

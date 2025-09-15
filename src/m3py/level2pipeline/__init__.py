@@ -13,6 +13,7 @@ from .solar_spectrum_removal import SolarSpectrumRemoval
 from .statistical_polish import StatisticalPolish
 from .clark_thermal_correction import ClarkThermalCorrection
 from .photometric_correction import PhotometricCorrection
+from .ssa import ConvertToSSA
 from .standard_pipelines import run_pipeline
 from . import utils
 
@@ -25,6 +26,7 @@ __all__ = [
     "StatisticalPolish",
     "ClarkThermalCorrection",
     "PhotometricCorrection",
+    "ConvertToSSA",
     "utils",
     "run_pipeline",
 ]

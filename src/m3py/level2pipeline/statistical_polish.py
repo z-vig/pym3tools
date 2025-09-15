@@ -10,7 +10,7 @@ import numpy as np
 import h5py as h5  # type: ignore
 
 # Relative Imports
-from .step import Step, PipelineState
+from .step import Step, PipelineState, StepCompletionState
 
 # Top-Level Imports
 from m3py.PDSretrieval.file_manager import M3FileManager
@@ -115,11 +115,15 @@ class StatisticalPolish(Step):
             state.data * self.stat_pol_coefs[None, None, :]
         )
 
+        new_flags = state.flags
+        new_flags.statistical_polishing_applied = StepCompletionState.Complete
+
         new_state = PipelineState(
             data=statisical_polish_applied,
             wvl=state.wvl,
             obs=state.obs,
             georef=state.georef,
+            flags=new_flags,
         )
 
         return new_state
