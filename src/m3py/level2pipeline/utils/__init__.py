@@ -17,6 +17,8 @@ from .photometric_correction_utils import (
     cosine_correction,
 )
 
+from .ssa_utils import IMSA, IMSA_r, AMSA, fit_to_AMSA
+
 __all__ = [
     "get_phase_function_rgi",
     "get_solar_correction_values",
@@ -32,4 +34,8 @@ __all__ = [
     "compute_limb_darkening",
     "compute_f_alpha",
     "cosine_correction",
+    "IMSA",
+    "IMSA_r",
+    "AMSA",
+    "fit_to_AMSA",
 ]

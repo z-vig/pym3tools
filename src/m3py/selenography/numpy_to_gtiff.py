@@ -16,6 +16,7 @@ def numpy_to_gtiff(
     arr: np.ndarray,
     crs: CRS,
     gtrans: Optional[tuple[float, ...]] = None,
+    band_names: Optional[list[str | float]] = None,
     dst_path: Optional[PathLike] = None,
 ) -> Path:
     """
@@ -31,6 +32,8 @@ def numpy_to_gtiff(
     gtrans: tuple of floats, optional
         Geotransform to be applied. If None (default), a default geotransform
         of (0, 1, 0, 0, 0, 1) will be used.
+    band_names: list of numbers or strings, optional
+        This list will be used to name the bands for reading by ArcGIS, etc...
     dst_path: PathLike, optional
         Destination path. If None (default), the file will be saved as a temp
         file, and the name of the temp file will be returned. If the tempfile
@@ -74,5 +77,7 @@ def numpy_to_gtiff(
     with rio.open(dst_path, "w", **profile) as dst:
         for i in range(1, arr.shape[2] + 1):
             dst.write(arr[:, :, i - 1], i)
+            if band_names is not None:
+                dst.set_band_description(i, band_names[i - 1])
 
     return dst_path
