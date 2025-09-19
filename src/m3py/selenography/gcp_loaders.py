@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 # Dependencies
 import numpy as np
-import rasterio as rio
-from rasterio.control import GroundControlPoint
+import rasterio as rio  # type: ignore
+from rasterio.control import GroundControlPoint  # type: ignore
 
 # Type Aliases
 PathLike = str | os.PathLike | Path
@@ -16,8 +16,7 @@ PixelGCPFunction = Callable[[PathLike], List[GroundControlPoint]]
 
 
 def gcps_from_arcgis(
-    points_path: PathLike,
-    src_path: PathLike
+    points_path: PathLike, src_path: PathLike
 ) -> list[GroundControlPoint]:
     """
     Returns a list of GCP objects from reading a .points file returned from
@@ -31,12 +30,11 @@ def gcps_from_arcgis(
     with rio.open(src_path) as ds:
         for i in range(gcps_in.shape[0]):
             xpixel, ypixel = ds.index(gcps_in[i, 0], gcps_in[i, 1])
-            gcps_out.append(GroundControlPoint(
-                row=xpixel,
-                col=ypixel,
-                x=gcps_in[i, 2],
-                y=gcps_in[i, 3]
-            ))
+            gcps_out.append(
+                GroundControlPoint(
+                    row=xpixel, col=ypixel, x=gcps_in[i, 2], y=gcps_in[i, 3]
+                )
+            )
 
     convert_gcps(points_path, src_path)
 
@@ -44,8 +42,7 @@ def gcps_from_arcgis(
 
 
 def gcps_from_qgis(
-    points_path: PathLike,
-    src_path: PathLike
+    points_path: PathLike, src_path: PathLike
 ) -> list[GroundControlPoint]:
     """
     Returns a list of GCP objects from reading a .points file returned from
@@ -67,19 +64,22 @@ def gcps_from_qgis(
     with rio.open(src_path) as ds:
         print(f"WIDTH: {ds.width}")
         print(f"HEIGHT: {ds.height}")
-        origin_x, pixel_width, _, origin_y, _, pixel_height = \
+        origin_x, pixel_width, _, origin_y, _, pixel_height = (
             ds.transform.to_gdal()
+        )
 
-        for i in range(gcps_in.shape[0]):
-            xpixel = (gcps_in[i, 2] - origin_x) / pixel_width
-            ypixel = (gcps_in[i, 3] - origin_y) / pixel_height
+        for j in range(gcps_in.shape[0]):
+            xpixel = (gcps_in[int(j), 2] - origin_x) / pixel_width
+            ypixel = (gcps_in[int(j), 3] - origin_y) / pixel_height
             # xpixel, ypixel = ds.index(gcps_in[i, 0], gcps_in[i, 1])
-            gcps_out.append(GroundControlPoint(
-                row=ypixel,
-                col=xpixel,
-                x=gcps_in[i, 0],
-                y=gcps_in[i, 1]
-            ))
+            gcps_out.append(
+                GroundControlPoint(
+                    row=ypixel,
+                    col=xpixel,
+                    x=gcps_in[int(j), 0],
+                    y=gcps_in[int(j), 1],
+                )
+            )
 
     convert_gcps(points_path, src_path)
 
@@ -87,8 +87,7 @@ def gcps_from_qgis(
 
 
 def read_gcps(
-    gcps_path: PathLike,
-    header_length: int = 7
+    gcps_path: PathLike, header_length: int = 7
 ) -> list[GroundControlPoint]:
     """
     Reads the Ground Control Points found in a *.gcps file.
@@ -97,7 +96,7 @@ def read_gcps(
         gcps_path,
         skiprows=header_length,
         delimiter=",",
-        usecols=[i for i in range(1, 5)]
+        usecols=[i for i in range(1, 5)],
     )
     ids = np.loadtxt(gcps_path, usecols=5, skiprows=header_length, dtype=str)
     gcp_list = []
@@ -118,14 +117,13 @@ class GCPSMetadata:
 
 
 def read_gcps_header(
-    gcps_path: PathLike,
-    header_length: int = 7
+    gcps_path: PathLike, header_length: int = 7
 ) -> GCPSMetadata:
     """
     Reads the header and returns the metadata found in a *.gcps file.
     """
     with open(gcps_path, "r") as f:
-        lines = [line.strip() for line in f.readlines()[:header_length-1]]
+        lines = [line.strip() for line in f.readlines()[: header_length - 1]]
 
     # Extract values after the first colon and space
     values = [line.split(": ", 1)[1] for line in lines]
@@ -135,9 +133,7 @@ def read_gcps_header(
 
 
 def convert_gcps(
-    gcps_path: PathLike,
-    src_path: PathLike,
-    dst_path: PathLike | None = None
+    gcps_path: PathLike, src_path: PathLike, dst_path: PathLike | None = None
 ) -> None:
     """
     Converts a list of Ground Control Points from a purely map-based format
@@ -180,13 +176,11 @@ def convert_gcps(
 
 
 MAP_GCP_LOADERS: Mapping[str, MapGCPFunction] = {
-    '.points': gcps_from_qgis,
-    '.txt': gcps_from_arcgis
+    ".points": gcps_from_qgis,
+    ".txt": gcps_from_arcgis,
 }
 
-PIXEL_GCP_LOADERS: Mapping[str, PixelGCPFunction] = {
-    '.gcps': read_gcps
-}
+PIXEL_GCP_LOADERS: Mapping[str, PixelGCPFunction] = {".gcps": read_gcps}
 
 
 def load_gcps(gcps_path: PathLike, src_path: Optional[PathLike] = None):

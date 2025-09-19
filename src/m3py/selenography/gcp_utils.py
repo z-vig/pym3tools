@@ -8,6 +8,7 @@ import subprocess
 
 # Dependencies
 import numpy as np
+
 # import rasterio as rio
 from rasterio.control import GroundControlPoint  # type: ignore
 from rasterio.crs import CRS  # type: ignore
@@ -26,7 +27,7 @@ def _apply_gcps_from_file(
     gcp_file_path: PathLike,
     dst_path: PathLike,
     input_array_offsets: Tuple[int, int],
-    verbose: bool = False
+    verbose: bool = False,
 ) -> None:
     """
     Loads Ground Control Points from a *.gcps file and applies them to a numpy
@@ -80,12 +81,9 @@ def _apply_gcps_from_file(
         if (new_col > arr.shape[1]) or (new_col < 0):
             continue
 
-        new_gcps.append(GroundControlPoint(
-            row=new_row,
-            col=new_col,
-            x=i.x,
-            y=i.y
-        ))
+        new_gcps.append(
+            GroundControlPoint(row=new_row, col=new_col, x=i.x, y=i.y)
+        )
 
     tempfile = numpy_to_gtiff(arr, crs)
     warp_to_gcps(tempfile, new_gcps, dst_path=dst_path)
@@ -93,10 +91,7 @@ def _apply_gcps_from_file(
 
 
 def _apply_gcps_from_geolocation_array(
-    arr: np.ndarray,
-    loc: np.ndarray,
-    dst_path: PathLike,
-    verbose: bool = False
+    arr: np.ndarray, loc: np.ndarray, dst_path: PathLike, verbose: bool = False
 ) -> None:
     """
     Collects Ground Control Points from a Geolocation Array backplane and
@@ -132,9 +127,11 @@ def _apply_gcps_from_geolocation_array(
     georeferenced.
     """
     if arr.shape != loc.shape:
-        raise ValueError(f"arr of size {arr.shape} is not compatible with"
-                         f"loc of size {loc.shape}. They must be the same"
-                         "shape")
+        raise ValueError(
+            f"arr of size {arr.shape} is not compatible with"
+            f"loc of size {loc.shape}. They must be the same"
+            "shape"
+        )
 
     prj_file = files("m3py.selenography.data").joinpath("cgs_moon_2000.prj")
     with prj_file.open() as f:
@@ -142,12 +139,14 @@ def _apply_gcps_from_geolocation_array(
 
     gcps = []
     for n, i in enumerate(range(0, loc.shape[0])):
-        gcps.append(GroundControlPoint(
-            row=i, col=0, x=loc[i, 0, 0], y=loc[i, 0, 1]
-        ))
-        gcps.append(GroundControlPoint(
-            row=i, col=loc.shape[1]-1, x=loc[i, -1, 0], y=loc[i, -1, 1]
-        ))
+        gcps.append(
+            GroundControlPoint(row=i, col=0, x=loc[i, 0, 0], y=loc[i, 0, 1])
+        )
+        gcps.append(
+            GroundControlPoint(
+                row=i, col=loc.shape[1] - 1, x=loc[i, -1, 0], y=loc[i, -1, 1]
+            )
+        )
 
     tempfile = numpy_to_gtiff(arr, crs)
 
@@ -161,7 +160,7 @@ def apply_gcps(
     gcp_pointer: np.ndarray | PathLike,
     dst_path: PathLike,
     input_array_offsets: Tuple[int, int],
-    verbose: bool = False
+    verbose: bool = False,
 ) -> None:
     """
     Applies Ground Control Points to a numpy array and saves it to dst_path as
@@ -188,11 +187,13 @@ def apply_gcps(
     if isinstance(gcp_pointer, np.ndarray):
         _apply_gcps_from_geolocation_array(arr, gcp_pointer, dst_path, verbose)
     elif isinstance(gcp_pointer, PathLike):
-        _apply_gcps_from_file(arr, gcp_pointer, dst_path, input_array_offsets,
-                              verbose)
+        _apply_gcps_from_file(
+            arr, gcp_pointer, dst_path, input_array_offsets, verbose
+        )
     else:
-        raise TypeError(f"{type(gcp_pointer)} is an invalid type for a gcp"
-                        "pointer.")
+        raise TypeError(
+            f"{type(gcp_pointer)} is an invalid type for a gcp" "pointer."
+        )
 
 
 def warp_to_gcps(
@@ -200,7 +201,7 @@ def warp_to_gcps(
     gcps: List[GroundControlPoint],
     dst_path: Optional[PathLike] = None,
     gdal_conda_env_name: str = "gdal",
-    verbose: bool = False
+    verbose: bool = False,
 ):
     """
     Uses GDALs warp functionality to warp an image to a set of Ground Control
@@ -237,17 +238,22 @@ def warp_to_gcps(
     tempfile_path = Path(tempfile.name)
 
     gcp_list_as_strings = [f"{i.col} {i.row} {i.x} {i.y}" for i in gcps]
-    gdal_translate = "gdal_translate -gcp " \
-                     f"{' -gcp '.join(gcp_list_as_strings)} "\
-                     f"{src_path} {tempfile_path}"
+    gdal_translate = (
+        "gdal_translate -gcp "
+        f"{' -gcp '.join(gcp_list_as_strings)} "
+        f"{src_path} {tempfile_path}"
+    )
 
-    gdal_warp = "gdalwarp -r near -tps -t_srs " \
-                f"{prj_file} {tempfile_path} {dst_path}"
+    gdal_warp = (
+        "gdalwarp -r near -tps -t_srs "
+        f"{prj_file} {tempfile_path} {dst_path}"
+    )
 
     def run_command_in_conda_env(env_name: str, command_str: str):
         out = subprocess.run(
             f"conda run -n {env_name} {command_str}".split(),
-            shell=True, capture_output=True
+            shell=True,
+            capture_output=True,
         )
         if verbose:
             print(command_str)

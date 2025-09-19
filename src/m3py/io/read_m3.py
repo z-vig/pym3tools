@@ -129,15 +129,7 @@ def get_wavelengths(
         assert isinstance(rfl_hdr_path, Path)
         assert acq in ("global", "targeted")
 
-    if acq == "global":
-        loc_key = "wavelength = {"
-    elif acq == "targeted":
-        loc_key = "target wavelengths = {"
-    else:
-        raise ValueError(
-            f"{acq} is an invalid acq_type. Must be "
-            "either global or targeted."
-        )
+    loc_key = "wavelength = {"  # wavelength list
     bbl_key = "bbl = {"  # Band Bands List
 
     def parse_list(file_read: str, start_string: str) -> Sequence[float | int]:

@@ -97,6 +97,8 @@ class PDSDir:
             l1_urls = re.findall(FileRetrievalPatterns.level1_v3, fread)
             l2_urls = re.findall(FileRetrievalPatterns.level2, fread)
 
+        l2_urls = [i.replace(".hdr", ".HDR") for i in l2_urls]
+
         for urls, lbl, objtype in zip(
             [l0_urls, l1_urls, l2_urls],
             ["Level 0", "Level 1", "Level 2"],
