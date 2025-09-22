@@ -25,6 +25,19 @@ dependencies = [
     "types-pyyaml (>=6.0.12.20250822,<7.0.0.0)"
 ]
 
+include = [
+    "m3py/PDSretrieval/data/L0_INDEX_OP1.LBL",
+    "m3py/PDSretrieval/data/L0_INDEX_OP1.TAB",
+    "m3py/PDSretrieval/data/L0_INDEX_OP2.LBL",
+    "m3py/PDSretrieval/data/L0_INDEX_OP2.TAB",
+    "m3py/PDSretrieval/data/L1B_INDEX.LBL",
+    "m3py/PDSretrieval/data/L1B_INDEX.TAB",
+    "m3py/PDSretrieval/data/L2_INDEX.LBL",
+    "m3py/PDSretrieval/data/L2_INDEX.TAB",
+    "m3py/selenography/data/cgs_moon_2000.prj",
+    "m3py/selenography/data/equidistant_cylindrical_moon.prj"
+]
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

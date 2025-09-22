@@ -89,6 +89,7 @@ class M3FileManager:
         self.georef_dir = GeorefDir(
             Path(self.root, "georef_data"), self.data_ID_long
         )
+        self.analysis_scope = self.georef_dir.analysis_scope
 
     def _initialize_directories(self, urls_file: os.PathLike):
         Path(self.root).mkdir()

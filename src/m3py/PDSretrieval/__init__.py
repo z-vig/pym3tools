@@ -9,7 +9,10 @@ the user and by other subpackages.
 from .file_manager import M3FileManager
 from .file_retrieval_patterns import get_m3_id
 
+from .create_urls_file import create_urls_file
+
 __all__ = [
     "M3FileManager",
-    "get_m3_id"
+    "get_m3_id",
+    "create_urls_file",
 ]

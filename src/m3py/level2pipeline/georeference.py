@@ -18,12 +18,24 @@ from m3py.metadata_models import AffineDict
 PathLike = str | os.PathLike | Path
 
 
+class AnalysisScopeError(Exception):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
 class Georeference(Step):
     def __init__(self, name: str, verbose: bool = False, **kwargs):
         super().__init__(name, **kwargs)
         self._verbose = verbose
 
     def run(self, state: PipelineState) -> PipelineState:
+        if self.manager.analysis_scope.value == "global":
+            raise AnalysisScopeError(
+                f"{self.manager.data_ID_long} is in "
+                f"{self.manager.analysis_scope.name} analysis scope. If "
+                "georeferencing is to be applied, Ground Control Points must "
+                "be added."
+            )
         rdn_temp_file = NamedTemporaryFile(suffix=".tif")
         obs_temp_file = NamedTemporaryFile(suffix=".tif")
         rdn_temp_file.close()
