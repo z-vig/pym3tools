@@ -9,20 +9,20 @@ authors = [
 keywords = ["hyperspectral", "processing", "spectral cube", "image", "M3"]
 license = {text = "LICENSE"}
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13, <3.14"
 dependencies = [
-    "numpy (>=2.3.2,<3.0.0)",
-    "psutil (>=7.0.0,<8.0.0)",
-    "matplotlib (>=3.10.5,<4.0.0)",
-    "requests (>=2.32.4,<3.0.0)",
-    "tqdm (>=4.67.1,<5.0.0)",
-    "h5py (>=3.14.0,<4.0.0)",
-    "rasterio (>=1.4.3,<2.0.0)",
-    "pyyaml (>=6.0.2,<7.0.0)",
-    "pydantic (>=2.11.7,<3.0.0)",
-    "scipy (>=1.16.1,<2.0.0)",
-    "scipy-stubs (>=1.16.1.1,<2.0.0.0)",
-    "types-pyyaml (>=6.0.12.20250822,<7.0.0.0)"
+    "numpy >=2.3.2,<3.0.0",
+    "psutil >=7.0.0,<8.0.0",
+    "matplotlib >=3.10.5,<4.0.0",
+    "requests >=2.32.4,<3.0.0",
+    "tqdm >=4.67.1,<5.0.0",
+    "h5py >=3.14.0,<4.0.0",
+    "rasterio >=1.4.3,<2.0.0",
+    "pyyaml >=6.0.2,<7.0.0",
+    "pydantic >=2.11.7,<3.0.0",
+    "scipy >=1.16.1,<2.0.0",
+    "scipy-stubs >=1.16.1.1,<2.0.0.0",
+    "types-pyyaml >=6.0.12.20250822,<7.0.0.0"
 ]
 
 include = [
