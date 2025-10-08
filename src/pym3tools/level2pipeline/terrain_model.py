@@ -13,7 +13,7 @@ from .step import Step, PipelineState, StepCompletionState
 from .utils.terrain_model_utils import calc_i, calc_e, calc_g, M3Geometry
 
 # Top-Level Imports
-from m3py.selenography.basic_pixel_alignment import align_pixels
+from pym3tools.selenography.basic_pixel_alignment import align_pixels
 
 PathLike = str | os.PathLike | Path
 
@@ -104,6 +104,10 @@ class TerrainModel(Step):
         m3geom = M3Geometry.from_obs(state.obs)
 
         maps = self._get_aligned_slope_aspect(state)
+
+        if not new_flags.georeferenced:
+            maps = None
+
         if maps is None:
             pass
         else:

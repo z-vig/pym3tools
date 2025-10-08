@@ -26,9 +26,9 @@ from .utils.data_fetching_utils import (
 )
 
 # Top-level imports
-from m3py.io.read_m3 import read_m3, Window
-from m3py.io.read_m3_georef import read_m3_georef
-from m3py.formats.m3_data_format import SUP
+from pym3tools.io.read_m3 import read_m3, Window
+from pym3tools.io.read_m3_georef import read_m3_georef
+from pym3tools.formats.m3_data_format import SUP
 
 
 class ThermalCorrectionMethod(Enum):
@@ -128,15 +128,7 @@ class ClarkThermalCorrection(Step):
                 "Skipping iterative temperature solution, using pre-defined"
                 " temperature values."
             )
-            if state.flags.georeferenced:
-                bbox = BoundingBox(
-                    left=state.georef.left_bound,
-                    bottom=state.georef.bottom_bound,
-                    right=state.georef.right_bound,
-                    top=state.georef.top_bound,
-                )
-                pds_temps = read_m3_georef(self.manager, bbox, "SUP")[:, :, 1]
-            else:
+            if state.flags.georeferenced.name == "Incomplete":
                 window = Window(
                     state.georef.col_offset,
                     state.georef.col_offset,
@@ -149,6 +141,14 @@ class ClarkThermalCorrection(Step):
                     self.manager.acq_type,
                     window=window,
                 )[:, :, 1]
+            else:
+                bbox = BoundingBox(
+                    left=state.georef.left_bound,
+                    bottom=state.georef.bottom_bound,
+                    right=state.georef.right_bound,
+                    top=state.georef.top_bound,
+                )
+                pds_temps = read_m3_georef(self.manager, bbox, "SUP")[:, :, 1]
 
             pds_temps[pds_temps == 0.1] = np.nan
             pds_temps[pds_temps == -999] = np.nan

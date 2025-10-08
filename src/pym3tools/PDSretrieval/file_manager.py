@@ -114,6 +114,7 @@ class M3FileManager:
         with h5.File(self.cache, "w") as ds:
             ds.attrs["DATA_ID"] = self.data_ID_long
             ds.attrs["ACQUISITION_MODE"] = self.acq_type
+            ds.attrs["ANALYSIS_SCOPE"] = self.analysis_scope
 
     def __str__(self):
         tree_string = (

@@ -12,8 +12,9 @@ import yaml
 from .step import Step, PipelineState, StepCompletionState
 
 # Top-Level Imports
-from m3py.selenography.gcp_utils import apply_gcps
-from m3py.metadata_models import AffineDict
+from pym3tools.selenography.gcp_utils import apply_gcps
+from pym3tools.selenography.gcp_writer import write_gcp_file_from_loc
+from pym3tools.metadata_models import AffineDict
 
 PathLike = str | os.PathLike | Path
 
@@ -30,12 +31,27 @@ class Georeference(Step):
 
     def run(self, state: PipelineState) -> PipelineState:
         if self.manager.analysis_scope.value == "global":
-            raise AnalysisScopeError(
-                f"{self.manager.data_ID_long} is in "
-                f"{self.manager.analysis_scope.name} analysis scope. If "
-                "georeferencing is to be applied, Ground Control Points must "
-                "be added."
+            gcp_temp_file = NamedTemporaryFile(suffix=".gcps")
+            gcp_temp_file.close()
+            with rio.open(self.manager.pds_dir.l1.loc_img) as f:
+                loc = np.transpose(f.read(), (1, 2, 0))
+            write_gcp_file_from_loc(
+                loc,
+                gcp_temp_file.name,
+                self.manager.pds_dir.l1.rdn_img,
+                state.georef.row_offset,
+                state.georef.col_offset,
+                state.georef.height,
+                state.georef.width,
+                0,
             )
+            self.manager.georef_dir.gcps = gcp_temp_file.name
+            # raise AnalysisScopeError(
+            #     f"{self.manager.data_ID_long} is in "
+            #     f"{self.manager.analysis_scope.name} analysis scope. If "
+            #     "georeferencing is to be applied, Ground Control Points must"
+            #     "be added."
+            # )
         rdn_temp_file = NamedTemporaryFile(suffix=".tif")
         obs_temp_file = NamedTemporaryFile(suffix=".tif")
         rdn_temp_file.close()

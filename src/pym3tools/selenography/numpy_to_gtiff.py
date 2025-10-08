@@ -78,6 +78,7 @@ def numpy_to_gtiff(
         for i in range(1, arr.shape[2] + 1):
             dst.write(arr[:, :, i - 1], i)
             if band_names is not None:
+                print(i - 1)
                 dst.set_band_description(i, band_names[i - 1])
 
     return dst_path

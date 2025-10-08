@@ -10,7 +10,7 @@ from .l2index import L2Index
 from .l0index import L0Index
 
 # Top-Level Imports
-from m3py.types import PathLike
+from pym3tools.types import PathLike
 
 
 class DataIDNotFoundError(Exception):
@@ -235,25 +235,29 @@ def create_urls_file(data_id: str, savedir: PathLike) -> None:
 
     l2_root = l2_lbl_path.parent
 
+    l2_cal_root_parts = list(l2_root.parts)[:-3]
+    l2_cal_root_parts[-1] = "CALIB"
+    l2_cal_root = Path(*l2_cal_root_parts)
+
     rfl_path = Path(l2_root, rfl_f.get_entry(l2_index_line))
     sup_path = Path(l2_root, sup_f.get_entry(l2_index_line))
-    solspec_path = Path(l2_root, solspec_f.get_entry(l2_index_line))
-    falpha_path = Path(l2_root, falpha_f.get_entry(l2_index_line))
+    solspec_path = Path(l2_cal_root, solspec_f.get_entry(l2_index_line))
+    falpha_path = Path(l2_cal_root, falpha_f.get_entry(l2_index_line))
 
     statpol_ids = {
         "G": [
-            Path(l2_root, "M3G20110830_RFL_STAT_POL_1"),
-            Path(l2_root, "M3G20110830_RFL_STAT_POL_2"),
+            Path(l2_cal_root, "M3G20110830_RFL_STAT_POL_1"),
+            Path(l2_cal_root, "M3G20110830_RFL_STAT_POL_2"),
         ],
         "T": [
-            Path(l2_root, "M3T20111020_RFL_STAT_POL_1"),
-            Path(l2_root, "M3T20111020_RFL_STAT_POL_2"),
+            Path(l2_cal_root, "M3T20111020_RFL_STAT_POL_1"),
+            Path(l2_cal_root, "M3T20111020_RFL_STAT_POL_2"),
         ],
     }
 
     gndtru_ids = [
-        Path(l2_root, f"{data_id[:3]}20111117_RFL_GRND_TRU_1"),
-        Path(l2_root, f"{data_id[:3]}20111117_RFL_GRND_TRU_2"),
+        Path(l2_cal_root, f"{data_id[:3]}20111117_RFL_GRND_TRU_1"),
+        Path(l2_cal_root, f"{data_id[:3]}20111117_RFL_GRND_TRU_2"),
     ]
 
     statpol_paths = []

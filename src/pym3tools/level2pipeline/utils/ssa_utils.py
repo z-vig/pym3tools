@@ -231,6 +231,7 @@ def AMSA(
     e: np.ndarray,
     g: np.ndarray,
     include_SHOE: bool = True,
+    independent_geometry: bool = True,
 ) -> np.ndarray:
     """
     Full AMSA Model from Hapke, 2002

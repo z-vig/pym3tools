@@ -7,8 +7,8 @@ from rasterio.coords import BoundingBox  # type: ignore
 from pydantic import BaseModel
 
 # Top-Level Imports
-from m3py.types import PathLike
-from m3py.PDSretrieval.file_manager import M3FileManager
+from pym3tools.types import PathLike
+from pym3tools.PDSretrieval.file_manager import M3FileManager
 
 # Relative Imports
 from .main_pipeline import M3Level2Pipeline

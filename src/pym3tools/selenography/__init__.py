@@ -18,6 +18,7 @@ commands to install it mannually:
 from .crop import polar_crop, regional_crop
 from .gcp_utils import apply_gcps
 from .gcp_loaders import load_gcps, read_gcps_header, read_gcps
+from .gcp_writer import write_gcp_file_from_loc
 from .basic_pixel_alignment import align_pixels
 from .mosaic import mosaic_arrays
 from .numpy_to_gtiff import numpy_to_gtiff
@@ -28,6 +29,7 @@ __all__ = [
     "apply_gcps",
     "load_gcps",
     "read_gcps",
+    "write_gcp_file_from_loc",
     "read_gcps_header",
     "align_pixels",
     "mosaic_arrays",

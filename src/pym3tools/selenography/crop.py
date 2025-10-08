@@ -6,10 +6,7 @@ import numpy as np
 from rasterio.coords import BoundingBox  # type: ignore
 
 
-def find_furthest_idx(
-    array: np.ndarray,
-    value: np.intp
-) -> int:
+def find_furthest_idx(array: np.ndarray, value: np.intp) -> int:
     """Finds fursthest index away from value."""
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmax()
@@ -19,15 +16,13 @@ def find_furthest_idx(
 def polar_crop(
     target_arr: np.ndarray,
     loc_arr: np.ndarray,
-    cropping_type: str = "equitorial"
+    cropping_type: str = "equitorial",
 ) -> np.ndarray:
     """
     Either crops an image arr to exclude the poles or include only the north
     or south pole as defined by +/-70 degrees latitude.
     """
-    no_poles = np.where(
-        (loc_arr[:, :, 1] > 70) | (loc_arr[:, :, 1] < -70)
-    )
+    no_poles = np.where((loc_arr[:, :, 1] > 70) | (loc_arr[:, :, 1] < -70))
 
     bool_image = np.zeros((loc_arr.shape[:2]))
     bool_image[*no_poles] = 1
@@ -72,9 +67,7 @@ def polar_crop(
 
 
 def regional_crop(
-    arr: np.ndarray,
-    loc_arr: np.ndarray,
-    bbox: BoundingBox
+    arr: np.ndarray, loc_arr: np.ndarray, bbox: BoundingBox
 ) -> Tuple[np.ndarray, int, int, int, int]:
     """
     Gets the offsets, width and height associated with a bounding box given
@@ -105,13 +98,13 @@ def regional_crop(
         Width of the cropped_arr.
     """
 
-    longitude_condition =\
-        (loc_arr[:, :, 0] - 360 > bbox.left) &\
-        (loc_arr[:, :, 0] - 360 < bbox.right)
+    longitude_condition = (loc_arr[:, :, 0] - 360 > bbox.left) & (
+        loc_arr[:, :, 0] - 360 < bbox.right
+    )
 
-    latitude_condition =\
-        (loc_arr[:, :, 1] > bbox.bottom) &\
-        (loc_arr[:, :, 1] < bbox.top)
+    latitude_condition = (loc_arr[:, :, 1] > bbox.bottom) & (
+        loc_arr[:, :, 1] < bbox.top
+    )
 
     bool_loc = np.zeros(loc_arr.shape[:2])
     bool_loc[longitude_condition & latitude_condition] = 1
@@ -125,9 +118,9 @@ def regional_crop(
     width = (cols.max() - cols.min()) + 1
 
     cropped_arr = arr[
-        row_offset:row_offset+height,
-        col_offset:col_offset+width,
-        ...
+        row_offset : row_offset + height,  # noqa
+        col_offset : col_offset + width,  # noqa
+        ...,
     ]
 
     return cropped_arr, row_offset, col_offset, height, width

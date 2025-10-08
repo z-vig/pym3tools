@@ -1,5 +1,5 @@
 [project]
-name = "m3py"
+name = "pym3tools"
 version = "0.1.0"
 description = """Data utilities for processing Moon Mineralogy Mapper Data from
 the NASA Planetary Data System."""
@@ -26,16 +26,16 @@ dependencies = [
 ]
 
 include = [
-    "m3py/PDSretrieval/data/L0_INDEX_OP1.LBL",
-    "m3py/PDSretrieval/data/L0_INDEX_OP1.TAB",
-    "m3py/PDSretrieval/data/L0_INDEX_OP2.LBL",
-    "m3py/PDSretrieval/data/L0_INDEX_OP2.TAB",
-    "m3py/PDSretrieval/data/L1B_INDEX.LBL",
-    "m3py/PDSretrieval/data/L1B_INDEX.TAB",
-    "m3py/PDSretrieval/data/L2_INDEX.LBL",
-    "m3py/PDSretrieval/data/L2_INDEX.TAB",
-    "m3py/selenography/data/cgs_moon_2000.prj",
-    "m3py/selenography/data/equidistant_cylindrical_moon.prj"
+    "pym3tools/PDSretrieval/data/L0_INDEX_OP1.LBL",
+    "pym3tools/PDSretrieval/data/L0_INDEX_OP1.TAB",
+    "pym3tools/PDSretrieval/data/L0_INDEX_OP2.LBL",
+    "pym3tools/PDSretrieval/data/L0_INDEX_OP2.TAB",
+    "pym3tools/PDSretrieval/data/L1B_INDEX.LBL",
+    "pym3tools/PDSretrieval/data/L1B_INDEX.TAB",
+    "pym3tools/PDSretrieval/data/L2_INDEX.LBL",
+    "pym3tools/PDSretrieval/data/L2_INDEX.TAB",
+    "pym3tools/selenography/data/cgs_moon_2000.prj",
+    "pym3tools/selenography/data/equidistant_cylindrical_moon.prj"
 ]
 
 

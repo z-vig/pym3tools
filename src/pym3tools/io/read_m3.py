@@ -5,8 +5,8 @@ import os
 from typing import Optional, Sequence, Tuple, Mapping
 
 # Top-Level Imports
-from m3py.PDSretrieval import M3FileManager
-from m3py.formats.m3_data_format import M3DataFormat
+from pym3tools.PDSretrieval import M3FileManager
+from pym3tools.formats.m3_data_format import M3DataFormat
 
 # Dependencies
 import numpy as np

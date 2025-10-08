@@ -7,8 +7,8 @@ import numpy as np
 from scipy.interpolate import RegularGridInterpolator  # type: ignore
 
 # Top-Level Imports
-from m3py.io.read_m3 import get_wavelengths
-from m3py.PDSretrieval.file_manager import M3FileManager
+from pym3tools.io.read_m3 import get_wavelengths
+from pym3tools.PDSretrieval.file_manager import M3FileManager
 
 
 class SolarSpectrumReadError(Exception):

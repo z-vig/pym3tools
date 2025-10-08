@@ -11,8 +11,8 @@ import h5py as h5  # type: ignore
 import yaml
 
 # Top-Level Imports
-from m3py.PDSretrieval.file_manager import M3FileManager
-from m3py.metadata_models import GeorefData
+from pym3tools.PDSretrieval.file_manager import M3FileManager
+from pym3tools.metadata_models import GeorefData
 
 PathLike = str | os.PathLike | Path
 

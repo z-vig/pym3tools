@@ -14,7 +14,7 @@ import numpy.typing as npt
 from .numpy_to_gtiff import numpy_to_gtiff
 
 # Top-Level Imports
-from m3py.types import PathLike
+from pym3tools.types import PathLike
 
 
 def mosaic_arrays(

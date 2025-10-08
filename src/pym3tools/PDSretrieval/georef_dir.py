@@ -7,8 +7,8 @@ from enum import Enum
 import yaml
 
 # Top-Level Imports
-from m3py.selenography.gcp_loaders import read_gcps
-from m3py.metadata_models import GeorefData
+from pym3tools.selenography.gcp_loaders import read_gcps
+from pym3tools.metadata_models import GeorefData
 
 
 PathLike = str | os.PathLike | Path
@@ -32,8 +32,6 @@ class TooManyGroundControlPointsError(Exception):
 class GeorefDir:
     root: PathLike
     gcps: PathLike
-    rdn: PathLike
-    obs: PathLike
     """
     File manager for the georeferenced data directory.
 
@@ -48,8 +46,6 @@ class GeorefDir:
     def __init__(self, root: PathLike, data_ID: str):
         self.root = Path(root)
         self.gcps = Path(self.root, data_ID).with_suffix(".gcps")
-        self.rdn = Path(self.root, "rdn.tif")
-        self.obs = Path(self.root, "obs.tif")
         self.metageo = Path(self.root, "georeference.yaml")
         with open(self.metageo, "w") as f:
             yaml.dump(GeorefData.empty().model_dump(), f)
@@ -60,6 +56,7 @@ class GeorefDir:
                 "Ground Control Points not found, analysis scope set to: "
                 f"{self.analysis_scope.name}"
             )
+
         elif self.gcps.is_file():
             self.analysis_scope = AnalysisScope.REGIONAL
             print(

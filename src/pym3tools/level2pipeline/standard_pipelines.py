@@ -7,7 +7,7 @@ import yaml
 from pydantic import ValidationError
 
 # Top-Level Imports
-from m3py.types import PathLike
+from pym3tools.types import PathLike
 
 # Relative Imports
 from .standard_pipeline_runners import (
