@@ -38,15 +38,17 @@ class ColumnMetadata:
         cls, index: L1BIndex | L2Index | L0Index
     ) -> "ColumnMetadata":
         if isinstance(index, L0Index):
-            idx_file = files("m3py.PDSretrieval.data").joinpath(
+            idx_file = files("pym3tools.PDSretrieval.data").joinpath(
                 "L0_INDEX_OP1.LBL"
             )
         elif isinstance(index, L1BIndex):
-            idx_file = files("m3py.PDSretrieval.data").joinpath(
+            idx_file = files("pym3tools.PDSretrieval.data").joinpath(
                 "L1B_INDEX.LBL"
             )
         elif isinstance(index, L2Index):
-            idx_file = files("m3py.PDSretrieval.data").joinpath("L2_INDEX.LBL")
+            idx_file = files("pym3tools.PDSretrieval.data").joinpath(
+                "L2_INDEX.LBL"
+            )
 
         col_obj_header = re.compile(r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?")
         with idx_file.open() as f:
@@ -101,7 +103,7 @@ class ColumnMetadata:
 
 
 def _generate_l1bindex_enum(savepath: PathLike):
-    l1B_idx = files("m3py.PDSretrieval.data").joinpath("L1B_INDEX.LBL")
+    l1B_idx = files("pym3tools.PDSretrieval.data").joinpath("L1B_INDEX.LBL")
     col_obj_header = r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?"
     col_name = re.compile(col_obj_header + r"NAME\s*=\s\"?(\w+(?::\w+)?)")
     with l1B_idx.open() as f:
@@ -115,7 +117,7 @@ def _generate_l1bindex_enum(savepath: PathLike):
 
 
 def _generate_l2index_enum(savepath: PathLike):
-    l2_idx = files("m3py.PDSretrieval.data").joinpath("L2_INDEX.LBL")
+    l2_idx = files("pym3tools.PDSretrieval.data").joinpath("L2_INDEX.LBL")
     col_obj_header = r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?"
     col_name = re.compile(col_obj_header + r"NAME\s*=\s\"?(\w+(?::\w+)?)")
     with l2_idx.open() as f:
@@ -129,7 +131,7 @@ def _generate_l2index_enum(savepath: PathLike):
 
 
 def _generate_l0index_enum(savepath: PathLike):
-    l2_idx = files("m3py.PDSretrieval.data").joinpath("L0_INDEX_OP1.LBL")
+    l2_idx = files("pym3tools.PDSretrieval.data").joinpath("L0_INDEX_OP1.LBL")
     col_obj_header = r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?"
     col_name = re.compile(col_obj_header + r"NAME\s*=\s\"?(\w+(?::\w+)?)")
     with l2_idx.open() as f:
@@ -143,10 +145,14 @@ def _generate_l0index_enum(savepath: PathLike):
 
 
 def create_urls_file(data_id: str, savedir: PathLike) -> None:
-    l0_idx_op1 = files("m3py.PDSretrieval.data").joinpath("L0_INDEX_OP1.TAB")
-    l0_idx_op2 = files("m3py.PDSretrieval.data").joinpath("L0_INDEX_OP2.TAB")
-    l1B_idx = files("m3py.PDSretrieval.data").joinpath("L1B_INDEX.TAB")
-    l2_idx = files("m3py.PDSretrieval.data").joinpath("L2_INDEX.TAB")
+    l0_idx_op1 = files("pym3tools.PDSretrieval.data").joinpath(
+        "L0_INDEX_OP1.TAB"
+    )
+    l0_idx_op2 = files("pym3tools.PDSretrieval.data").joinpath(
+        "L0_INDEX_OP2.TAB"
+    )
+    l1B_idx = files("pym3tools.PDSretrieval.data").joinpath("L1B_INDEX.TAB")
+    l2_idx = files("pym3tools.PDSretrieval.data").joinpath("L2_INDEX.TAB")
     jpl_url = Path("https://planetarydata.jpl.nasa.gov/img/data/m3")
 
     l0_index_line = "None"

@@ -52,7 +52,9 @@ def _apply_gcps_from_file(
         (row offset, column offset) for the input array from the full
         M<sup>3</sup> strip.
     """
-    prj_file = files("m3py.selenography.data").joinpath("cgs_moon_2000.prj")
+    prj_file = files("pym3tools.selenography.data").joinpath(
+        "cgs_moon_2000.prj"
+    )
     with prj_file.open() as f:
         crs = CRS.from_wkt(f.read())
 
@@ -133,7 +135,9 @@ def _apply_gcps_from_geolocation_array(
             "shape"
         )
 
-    prj_file = files("m3py.selenography.data").joinpath("cgs_moon_2000.prj")
+    prj_file = files("pym3tools.selenography.data").joinpath(
+        "cgs_moon_2000.prj"
+    )
     with prj_file.open() as f:
         crs = CRS.from_wkt(f.read())
 
@@ -231,7 +235,9 @@ def warp_to_gcps(
 
     # Getting GCS Moon 2000 projection, which is the default coordinate
     # System for M3 backplanes.
-    prj_file = files("m3py.selenography.data").joinpath("cgs_moon_2000.prj")
+    prj_file = files("pym3tools.selenography.data").joinpath(
+        "cgs_moon_2000.prj"
+    )
 
     tempfile = tf.NamedTemporaryFile(suffix=".tif")
     tempfile.close()

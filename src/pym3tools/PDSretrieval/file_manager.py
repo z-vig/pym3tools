@@ -59,9 +59,12 @@ class M3FileManager:
         cache_name: Optional[str] = None,
         reset_cache: bool = False,
     ):
+        # Setting context variables
         self.root = Path(root, data_id)
         self.data_ID_long = data_id
         self.data_ID = re.findall(FileRetrievalPatterns.short_id, data_id)[0]
+
+        # Resolving acquisition type from file name
         self.acq_type = re.findall(FileRetrievalPatterns.acq_type, data_id)[0]
         if self.acq_type == "G":
             self.acq_type = "global"
@@ -70,26 +73,32 @@ class M3FileManager:
         else:
             raise ValueError("Invalid Acquisition Type.")
 
+        # Setting a default cache name
         if cache_name is None:
             self.cache = Path(self.root, "pipeline_cache.hdf5")
         else:
             self.cache = Path(self.root, cache_name).with_suffix(".hdf5")
 
+        # If a *_urls.txt file is found, create a new directory
         if Path(root, f"{self.data_ID_long}_urls.txt").is_file():
             print("Initializing new stripe directory...")
             self._initialize_directories(
                 Path(root, f"{self.data_ID_long}_urls.txt")
             )
 
-        if reset_cache:
-            self._reset_cache()
-
+        # Delegates creation of subdirectories to other classes
         self.pds_dir = PDSDir(Path(self.root, "pds_data"), self.data_ID_long)
         self.cal_dir = CalDir(Path(self.root, "cal_data"), self.data_ID_long)
         self.georef_dir = GeorefDir(
             Path(self.root, "georef_data"), self.data_ID_long
         )
+
+        # Sets the analysis scope from the georef directory
         self.analysis_scope = self.georef_dir.analysis_scope
+
+        # Writes a new HDF5 file and adds some basic info
+        if reset_cache:
+            self._reset_cache()
 
     def _initialize_directories(self, urls_file: os.PathLike):
         Path(self.root).mkdir()
@@ -114,7 +123,7 @@ class M3FileManager:
         with h5.File(self.cache, "w") as ds:
             ds.attrs["DATA_ID"] = self.data_ID_long
             ds.attrs["ACQUISITION_MODE"] = self.acq_type
-            ds.attrs["ANALYSIS_SCOPE"] = self.analysis_scope
+            ds.attrs["ANALYSIS_SCOPE"] = self.analysis_scope.value
 
     def __str__(self):
         tree_string = (

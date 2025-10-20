@@ -1,5 +1,5 @@
 """
-# m3py
+# pym3tools
 
 Data utilities for processing Moon Mineralogy Mapper Data from the NASA
 Planetary Data System. Available modules include:
@@ -31,5 +31,5 @@ __all__ = [
     "metadata_models",
     "M3FileManager",
     "M3Level2Pipeline",
-    "get_m3_id"
+    "get_m3_id",
 ]

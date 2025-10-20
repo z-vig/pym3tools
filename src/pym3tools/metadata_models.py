@@ -6,7 +6,7 @@ from pydantic import BaseModel
 import numpy as np
 from rasterio import Affine  # type: ignore
 
-prj_file = files("m3py.selenography.data").joinpath("cgs_moon_2000.prj")
+prj_file = files("pym3tools.selenography.data").joinpath("cgs_moon_2000.prj")
 with prj_file.open() as f:
     DEFAULT_CRS = f.read()
 
