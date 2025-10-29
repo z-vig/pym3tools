@@ -11,20 +11,14 @@ import h5py as h5  # type: ignore
 # Relative Imports
 from .pds_dir import PDSDir
 from .cal_dir import CalDir
-from .georef_dir import GeorefDir
+from .georef_dir import GeorefDir, AnalysisScope
 from .file_retrieval_patterns import FileRetrievalPatterns
 
 
 class M3FileManager:
-    root: os.PathLike
-    data_ID_long: str
-    data_ID: str
-    acq_type: str
-    pds_dir: PDSDir
-    cal_dir: CalDir
-    georef_dir: GeorefDir
     """
-    Stores data for M3 file locations for a single M3 stripe.
+    Stores data for M3 file locations for a single M3 stripe and initializes
+    file downloads if certain files are not present.
 
     Parameters
     ----------
@@ -50,7 +44,26 @@ class M3FileManager:
         Calibration directory. Contains calibration data from PDS.
     georef_dir: PathLike
         Georeferenced Directory. Contains all GeoTiff, georeferenced data.
+
+    Notes
+    -----
+    To initialize a brand new dataset, create the url list for the M3 stripe
+    using `create_urls_file()` and place the *_urls.txt in the same root
+    directory as the georeference file (*.gcps). Running the M3FileManager
+    for the appropriate data id will move the *_urls.txt and *.gcps into their
+    respective subdirectories.
+
+    See also `PDSDir`, `CalDir` and `GeorefDir` classes, since these are each
+    attributes of `M3FileManager`.
     """
+
+    root: os.PathLike
+    data_ID_long: str
+    data_ID: str
+    acq_type: str
+    pds_dir: PDSDir
+    cal_dir: CalDir
+    georef_dir: GeorefDir
 
     def __init__(
         self,
@@ -101,13 +114,14 @@ class M3FileManager:
             self._reset_cache()
 
     def _initialize_directories(self, urls_file: os.PathLike):
-        Path(self.root).mkdir()
+        Path(self.root).mkdir()  # Create root directory for dataset
 
+        # Create sub directories within root
         dir_names = ["pds_data", "cal_data", "georef_data"]
-
         for i in dir_names:
             Path(self.root, i).mkdir()
 
+        # Move *_urls.txt files into pds_data and cal_data subdirectories.
         shutil.copyfile(
             urls_file,
             Path(self.root, "pds_data", f"{self.data_ID_long}_urls.txt"),
@@ -117,13 +131,34 @@ class M3FileManager:
             Path(self.root, "cal_data", f"{self.data_ID_long}_urls.txt"),
         )
 
+        # If present, move .gcps file into georef directory.
+        new_gcp_path = Path(
+            Path(self.root).parent, self.data_ID_long
+        ).with_suffix(".gcps")
+        print(new_gcp_path)
+        if new_gcp_path.exists():
+            print(
+                f"New Ground Control Points found: {new_gcp_path}, "
+                "setting analysis scope to Regional"
+            )
+            self.analysis_scope = AnalysisScope.REGIONAL
+            shutil.move(
+                new_gcp_path, Path(self.root, "georef_data", new_gcp_path.name)
+            )
+        else:
+            print(
+                "No Ground Control Points found during initialization, "
+                "setting analysis scope to Global"
+            )
+            self.analysis_scope = AnalysisScope.GLOBAL
+
         self._reset_cache()
 
     def _reset_cache(self):
         with h5.File(self.cache, "w") as ds:
             ds.attrs["DATA_ID"] = self.data_ID_long
             ds.attrs["ACQUISITION_MODE"] = self.acq_type
-            ds.attrs["ANALYSIS_SCOPE"] = self.analysis_scope.value
+            ds.attrs["ANALYSIS_SCOPE"] = str(self.analysis_scope)
 
     def __str__(self):
         tree_string = (

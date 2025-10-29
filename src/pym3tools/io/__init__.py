@@ -12,5 +12,5 @@ __all__ = [
     "read_m3",
     "read_m3_georef",
     "get_wavelengths",
-    "Window"
+    "Window",
 ]

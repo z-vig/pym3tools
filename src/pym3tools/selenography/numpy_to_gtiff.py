@@ -16,8 +16,10 @@ def numpy_to_gtiff(
     arr: np.ndarray,
     crs: CRS,
     gtrans: Optional[tuple[float, ...]] = None,
-    band_names: Optional[list[str | float]] = None,
+    band_lbls: Optional[list[str | float]] = None,
     dst_path: Optional[PathLike] = None,
+    save_envi: bool = False,
+    wavelength_field: bool = False,
 ) -> Path:
     """
     Saves a numpy array to a file with a dummy geotransform [0,1,0,0,0,1,0] and
@@ -63,7 +65,7 @@ def numpy_to_gtiff(
         tempfile.close()
         dst_path = Path(tempfile.name)
     else:
-        dst_path = Path(dst_path)
+        dst_path = Path(dst_path).with_suffix(".tif")
 
     if arr.ndim == 2:
         arr = arr[:, :, np.newaxis]
@@ -77,8 +79,19 @@ def numpy_to_gtiff(
     with rio.open(dst_path, "w", **profile) as dst:
         for i in range(1, arr.shape[2] + 1):
             dst.write(arr[:, :, i - 1], i)
-            if band_names is not None:
-                print(i - 1)
-                dst.set_band_description(i, band_names[i - 1])
+
+    if save_envi:
+        profile["driver"] = "ENVI"
+        with rio.open(dst_path.with_suffix(".bsq"), "w", **profile) as dst:
+            for i in range(1, arr.shape[2] + 1):
+                dst.write(arr[:, :, i - 1], i)
+
+        if (band_lbls is not None) and wavelength_field:
+            hdr_lines = [
+                "wavelength units = nm",
+                "wavelength = {" + ", ".join(map(str, band_lbls)) + "}",
+            ]
+            with open(Path(dst_path).with_suffix(".hdr"), "a") as f:
+                f.write("\n".join(hdr_lines))
 
     return dst_path

@@ -1,7 +1,7 @@
 # Standard Libraries
 import os
 from pathlib import Path
-from enum import Enum
+from enum import StrEnum
 
 # Dependencies
 import yaml
@@ -14,7 +14,7 @@ from pym3tools.metadata_models import GeorefData
 PathLike = str | os.PathLike | Path
 
 
-class AnalysisScope(Enum):
+class AnalysisScope(StrEnum):
     REGIONAL = "regional"
     GLOBAL = "global"
 
@@ -47,8 +47,9 @@ class GeorefDir:
         self.root = Path(root)
         self.gcps = Path(self.root, data_ID).with_suffix(".gcps")
         self.metageo = Path(self.root, "georeference.yaml")
-        with open(self.metageo, "w") as f:
-            yaml.dump(GeorefData.empty().model_dump(), f)
+        if not self.metageo.exists():
+            with open(self.metageo, "w") as f:
+                yaml.dump(GeorefData.empty().model_dump(), f)
 
         if not self.gcps.is_file():
             self.analysis_scope = AnalysisScope.GLOBAL

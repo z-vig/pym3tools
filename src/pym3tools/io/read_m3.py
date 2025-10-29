@@ -114,6 +114,20 @@ def get_wavelengths(
     acq_type: str
         Either `"global"` or `"targeted"`.
 
+    Returns
+    -------
+    all_wavelengths: np.ndarray
+        List of all raw M3 wavelengths for the data level
+    bbl: np.ndarray
+        Bad band list. Index of good bands.
+
+    Examples
+    --------
+    ```
+    >>> mngr = m3.M3FileManager(root, data_id)
+    >>> wvl, bbl = m3.io.get_wavelengths(mngr)
+    >>> good_wvl = wvl[bbl]
+    ```
     """
     if file_config is not None:
         rfl_hdr_path = file_config.pds_dir.l2.rfl_hdr

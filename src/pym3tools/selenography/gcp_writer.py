@@ -1,5 +1,6 @@
 # Standard Libraries
 from uuid import uuid4
+import shutil
 
 # Dependencies
 import numpy as np
@@ -18,6 +19,7 @@ def write_gcp_file_from_loc(
     width: int,
     band: int,
     ngcps: int = 50,
+    save_gcps_copy: bool = False,
 ):
     """
     Writes a *.gcps file using the four corners plus 50 random points from the
@@ -34,28 +36,27 @@ def write_gcp_file_from_loc(
         f.write("index, pixel_row, pixel_col, map_x, map_y, ID\n")
 
         rng = np.random.default_rng()
-        rand_row = rng.choice(
-            np.arange(row_offset, row_offset + height), ngcps, replace=False
-        )
-        rand_col = rng.choice(
-            np.arange(col_offset, col_offset + width), ngcps, replace=False
-        )
-        gcps = loc_image[rand_row, rand_col, :2]
+        rand_row = rng.choice(np.arange(0, height), ngcps, replace=False)
+        rand_col = rng.choice(np.arange(0, width), ngcps, replace=False)
+        gcps = loc_image[rand_row + row_offset, rand_col + col_offset, :2]
         for n in range(ngcps):
             f.write(
                 f"{n}, {rand_row[n]}, {rand_col[n]}, {gcps[n, 0]},"
                 f" {gcps[n, 1]}, {uuid4()}\n"
             )
         corner_pts = [
-            (row_offset, col_offset),
-            (row_offset + height - 1, col_offset),
-            (row_offset, col_offset - 1 + width - 1),
-            (row_offset + height - 1, col_offset + width - 1),
+            (0, 0),
+            (height - 1, 0),
+            (0, width - 1),
+            (height - 1, width - 1),
         ]
         for n, c in enumerate(corner_pts):
             i, j = c
-            print(i, j)
             f.write(
-                f"{ngcps + n}, {i}, {j}, {loc_image[i, j, 0]},"
-                f" {loc_image[i, j, 1]}, {uuid4()}\n"
+                f"{ngcps + n}, {i}, {j}, "
+                f"{loc_image[i+row_offset, j+col_offset, 0]},"
+                f" {loc_image[i+row_offset, j+col_offset, 1]}, {uuid4()}\n"
             )
+
+    if save_gcps_copy:
+        shutil.copy(save_path, "./debug_gcps.txt")
