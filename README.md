@@ -6,7 +6,7 @@
 
 ## What is `pym3tools`?
 
-`pym3tools` is a modular data pipeline designed to make fetching, processing and analyzing M^3^ a breeze in Python. `pym3tools` incorporates many different processing methods from current planetary science literature, which allows it to serve as a state-of-the-art, standardized processing method, which will help improve the repeatability of geologic results obtained via M^3^.
+`pym3tools` is a modular data pipeline designed to make fetching, processing and analyzing M^3^ a breeze in Python. `pym3tools` incorporates many different processing methods from current planetary science literature, which allows it to serve as a state-of-the-art, standardized processing method, which will help improve the repeatability of geologic results obtained via M<sup>3</sup>.
 
 ---
 
