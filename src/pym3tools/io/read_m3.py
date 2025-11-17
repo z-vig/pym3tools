@@ -100,7 +100,6 @@ def read_m3(
 def get_wavelengths(
     file_config: M3FileManager | None = None,
     rfl_hdr: Optional[pathlike] = None,
-    acq_type: Optional[str] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns a list of wavelengths from reflectance header file.
@@ -131,17 +130,10 @@ def get_wavelengths(
     """
     if file_config is not None:
         rfl_hdr_path = file_config.pds_dir.l2.rfl_hdr
-        acq = file_config.acq_type
-    else:
-        if rfl_hdr is None or acq_type is None:
-            raise ValueError(
-                "Must provide both rfl_hdr and acq_type if no" "file_config."
-            )
+    elif rfl_hdr is not None:
         rfl_hdr_path = Path(rfl_hdr)
-        acq = acq_type
-
-        assert isinstance(rfl_hdr_path, Path)
-        assert acq in ("global", "targeted")
+    else:
+        raise ValueError("Either `file_config` or `rfl_hdr` must be provided.")
 
     loc_key = "wavelength = {"  # wavelength list
     bbl_key = "bbl = {"  # Band Bands List

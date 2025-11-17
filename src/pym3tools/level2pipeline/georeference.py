@@ -46,12 +46,7 @@ class Georeference(Step):
                 0,
             )
             self.manager.georef_dir.gcps = gcp_temp_file.name
-            # raise AnalysisScopeError(
-            #     f"{self.manager.data_ID_long} is in "
-            #     f"{self.manager.analysis_scope.name} analysis scope. If "
-            #     "georeferencing is to be applied, Ground Control Points must"
-            #     "be added."
-            # )
+
         rdn_temp_file = NamedTemporaryFile(suffix=".tif")
         obs_temp_file = NamedTemporaryFile(suffix=".tif")
         rdn_temp_file.close()

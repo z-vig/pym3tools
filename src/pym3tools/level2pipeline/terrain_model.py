@@ -103,18 +103,15 @@ class TerrainModel(Step):
 
         m3geom = M3Geometry.from_obs(state.obs)
 
-        maps = self._get_aligned_slope_aspect(state)
-
-        if not new_flags.georeferenced:
-            maps = None
-
-        if maps is None:
+        if new_flags.georeferenced is not StepCompletionState.Complete:
             pass
         else:
-            new_flags.external_DEM_used = StepCompletionState.Complete
-            slope_map, aspect_map = maps
-            m3geom.slope = slope_map
-            m3geom.aspect = aspect_map
+            maps = self._get_aligned_slope_aspect(state)
+            if maps is not None:
+                new_flags.external_DEM_used = StepCompletionState.Complete
+                slope_map, aspect_map = maps
+                m3geom.slope = slope_map
+                m3geom.aspect = aspect_map
 
         m3geom.convert_to_rad()
         incidence_map = calc_i(m3geom)

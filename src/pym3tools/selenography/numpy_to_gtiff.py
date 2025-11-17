@@ -94,4 +94,6 @@ def numpy_to_gtiff(
             with open(Path(dst_path).with_suffix(".hdr"), "a") as f:
                 f.write("\n".join(hdr_lines))
 
+        # if (band_lbls is not None) and not wavelength_field:
+
     return dst_path

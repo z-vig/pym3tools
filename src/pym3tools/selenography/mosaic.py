@@ -1,20 +1,19 @@
 # Standard Libraries
 from tempfile import NamedTemporaryFile
 from typing import Optional
-from pathlib import Path
 
 # Dependencies
 import rasterio as rio  # type: ignore
 from rasterio.merge import merge  # type: ignore
 from rasterio.crs import CRS  # type: ignore
 import numpy as np
-import numpy.typing as npt
 
 # Relative Imports
 from .numpy_to_gtiff import numpy_to_gtiff
 
 # Top-Level Imports
 from pym3tools.types import PathLike
+from pym3tools.io.write_raster import write_to_raster
 
 
 def mosaic_arrays(
@@ -22,9 +21,24 @@ def mosaic_arrays(
     gtrans_list: list[tuple[float, ...]],
     crs: CRS,
     save_path: PathLike,
-    band_lbls: Optional[npt.NDArray | list] = None,
+    band_lbls: Optional[list] = None,
     wavelength_field: bool = False,
 ):
+    """
+    Writes a list of images to disk as a single composite image.
+
+    Parameters
+    ----------
+    arr_list: list of np.ndarray
+        List of image arrays to be mosaicked.
+    gtrans_list: list of tuples
+        List of geotransform tuples corresponding to each array in `arr_list`.
+    crs: CRS
+        The coordinate reference system object for the mosaic.
+    save_path: PathLike
+        File path to save the mosaic.
+    band_lbls:
+    """
     temp_file_list: list[str] = []
     for arr, gtrans in zip(arr_list, gtrans_list):
         temp = NamedTemporaryFile(suffix=".tif")
@@ -52,21 +66,15 @@ def mosaic_arrays(
         }
     )
 
-    with rio.open(Path(save_path).with_suffix(".bsq"), "w", **profile) as dst:
-        for band in range(1, mosaic.shape[0] + 1):
-            dst.write(mosaic[band - 1, :, :], band)
-            if band_lbls is not None:
-                if not wavelength_field:
-                    dst.set_band_description(band, band_lbls[band - 1])
+    print(f"Writing mosaic of size: {mosaic.shape} to {save_path}")
 
-    if (band_lbls is not None) and wavelength_field:
-        hdr_lines = [
-            "wavelength units = nm",
-            "wavelength = {" + ", ".join(map(str, band_lbls)) + "}",
-        ]
-        with open(Path(save_path).with_suffix(".hdr"), "a") as f:
-            f.write("\n".join(hdr_lines))
-
-    for i in mosaic_list:
-        if not isinstance(i, str):
-            i.close()
+    mosaic = np.transpose(mosaic, (1, 2, 0))
+    write_to_raster(
+        mosaic,
+        profile["crs"],
+        mosaic_transform,
+        band_lbls=band_lbls,
+        dst_path=save_path,
+        save_mode="ENVI",
+        wavelength_field=wavelength_field,
+    )

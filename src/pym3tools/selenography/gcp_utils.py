@@ -257,7 +257,7 @@ def warp_to_gcps(
 
     def run_command_in_conda_env(env_name: str, command_str: str):
         out = subprocess.run(
-            f"conda run -n {env_name} {command_str}".split(),
+            f"conda run -r bilinear -n {env_name} {command_str}".split(),
             shell=True,
             capture_output=True,
         )

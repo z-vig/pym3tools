@@ -1,9 +1,15 @@
 # Standarad Libraries
-from typing import Tuple
+from typing import Tuple, Optional, Literal
 
 # Dependencies
 import numpy as np
+import rasterio as rio  # type: ignore
 from rasterio.coords import BoundingBox  # type: ignore
+from rasterio.crs import CRS  # type: ignore
+from affine import Affine  # type: ignore
+
+# Top-Level Imports
+from pym3tools.types import PathLike, Path
 
 
 def find_furthest_idx(array: np.ndarray, value: np.intp) -> int:
@@ -124,3 +130,57 @@ def regional_crop(
     ]
 
     return cropped_arr, row_offset, col_offset, height, width
+
+
+def general_crop(
+    data_fp: PathLike,
+    bbox: BoundingBox,
+    save_name: str,
+    save_mode: Literal["ENVI"] | Literal["GTIFF"],
+    arr: Optional[np.ndarray] = None,
+    geotransform: Optional[
+        tuple[float, float, float, float, float, float]
+    ] = None,
+    crs: Optional[CRS] = None,
+):
+    if arr is not None:
+        raise NotImplementedError(
+            "Cropping of a numpy array is not implemented yet. Please provide"
+            " a path to a georeferenced file."
+        )
+
+    if save_mode == "ENVI":
+        driver = "ENVI"
+        save_path = Path(Path(data_fp).parent, save_name).with_suffix(".bsq")
+    elif save_mode == "GTIFF":
+        driver = "GTiff"
+        save_path = Path(Path(data_fp).parent, save_name).with_suffix(".tif")
+    with rio.open(data_fp, "r") as src:
+        w = src.window(*bbox)
+        print(src.shape)
+        print(w.col_off)
+
+        _old = src.transform
+        left = _old.c + _old.a * w.col_off
+        top = _old.f + _old.e * w.row_off
+        new_transform = Affine(_old.a, _old.b, left, _old.d, _old.e, top)
+
+        arr = src.read(window=w)
+        if arr is None:
+            return
+        prfl = src.profile
+        # Update the profile so the written file has correct size and
+        # georeference
+        prfl.update(
+            {
+                "driver": driver,
+                "height": arr.shape[1],
+                "width": arr.shape[2],
+                "transform": new_transform,
+            }
+        )
+
+        with rio.open(save_path, "w", **prfl) as dst:
+            dst.write(arr * 1000)
+
+    return arr
