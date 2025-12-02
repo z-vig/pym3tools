@@ -25,7 +25,7 @@ class AnalysisScopeError(Exception):
 
 
 class Georeference(Step):
-    def __init__(self, name: str, verbose: bool = False, **kwargs):
+    def __init__(self, name: str, verbose: bool = True, **kwargs):
         super().__init__(name, **kwargs)
         self._verbose = verbose
 

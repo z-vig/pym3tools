@@ -29,6 +29,9 @@ class AffineDict(BaseModel):
             a=self.a, b=self.b, c=self.c, d=self.d, e=self.e, f=self.f
         )
 
+    def to_gdal(self) -> tuple[float, float, float, float, float, float]:
+        return (self.c, self.a, self.b, self.f, self.d, self.e)
+
 
 class GeorefData(BaseModel):
     row_offset: int

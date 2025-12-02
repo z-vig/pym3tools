@@ -1,4 +1,5 @@
 # Standarad Libraries
+import logging
 from typing import Tuple, Optional, Literal
 
 # Dependencies
@@ -10,6 +11,14 @@ from affine import Affine  # type: ignore
 
 # Top-Level Imports
 from pym3tools.types import PathLike, Path
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+class CroppingError(Exception):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
 
 
 def find_furthest_idx(array: np.ndarray, value: np.intp) -> int:
@@ -103,9 +112,11 @@ def regional_crop(
     width:
         Width of the cropped_arr.
     """
+    # Conversion to -180->180 convention for longitude
+    loc_arr[loc_arr[:, :, 0] > 180, 0] -= 360
 
-    longitude_condition = (loc_arr[:, :, 0] - 360 > bbox.left) & (
-        loc_arr[:, :, 0] - 360 < bbox.right
+    longitude_condition = (loc_arr[:, :, 0] > bbox.left) & (
+        loc_arr[:, :, 0] < bbox.right
     )
 
     latitude_condition = (loc_arr[:, :, 1] > bbox.bottom) & (
@@ -116,6 +127,13 @@ def regional_crop(
     bool_loc[longitude_condition & latitude_condition] = 1
 
     rows, cols = np.where(bool_loc == 1)
+
+    logger.debug(f"{rows.size} rows were found to be in the bounding box.")
+    logger.debug(f"{cols.size} columns were found to be in the bounding box.")
+
+    if rows.size == 0 or cols.size == 0:
+        logger.critical("The dataset is not within the bounding box.")
+        raise CroppingError("The dataset is not within the bounding box.")
 
     row_offset = rows.min()
     height = (rows.max() - rows.min()) + 1
@@ -157,8 +175,6 @@ def general_crop(
         save_path = Path(Path(data_fp).parent, save_name).with_suffix(".tif")
     with rio.open(data_fp, "r") as src:
         w = src.window(*bbox)
-        print(src.shape)
-        print(w.col_off)
 
         _old = src.transform
         left = _old.c + _old.a * w.col_off
@@ -181,6 +197,6 @@ def general_crop(
         )
 
         with rio.open(save_path, "w", **prfl) as dst:
-            dst.write(arr * 1000)
+            dst.write(arr)
 
     return arr

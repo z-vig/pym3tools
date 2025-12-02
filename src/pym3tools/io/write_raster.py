@@ -7,6 +7,7 @@ import re
 import numpy as np
 import rasterio as rio  # type: ignore
 from rasterio.crs import CRS  # type: ignore
+from affine import Affine  # type: ignore
 
 # Top-Level Imports
 from pym3tools.types import PathLike, Path
@@ -22,7 +23,7 @@ class BandLabelError(Exception):
 def write_to_raster(
     arr: np.ndarray,
     crs: CRS,
-    gtrans: Optional[tuple[float, ...]] = None,
+    gtrans: Optional[Affine] = None,
     band_lbls: Optional[list[str | float]] = None,
     dst_path: Optional[PathLike] = None,
     save_mode: SaveModeType = "ENVI",
@@ -59,7 +60,7 @@ def write_to_raster(
     Path
     """
     if gtrans is None:
-        gtrans = (0, 1, 0, 0, 0, 1, 0)
+        gtrans = (0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
 
     # Adjusting for dimensionality of the dataset (2D or 3D).
     if arr.ndim == 2:
@@ -78,7 +79,7 @@ def write_to_raster(
         "height": arr.shape[0],
         "count": arr.shape[2],
         "crs": crs,
-        "transform": gtrans,
+        "transform": Affine(*gtrans),
         "nodata": -999,
     }
     # Saves to a temp file if dst_path is not specified.

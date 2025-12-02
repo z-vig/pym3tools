@@ -19,7 +19,7 @@ def write_gcp_file_from_loc(
     width: int,
     band: int,
     ngcps: int = 50,
-    save_gcps_copy: bool = False,
+    save_gcps_copy: bool = True,
 ):
     """
     Writes a *.gcps file using the four corners plus 50 random points from the

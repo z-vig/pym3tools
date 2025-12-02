@@ -205,7 +205,7 @@ def warp_to_gcps(
     gcps: List[GroundControlPoint],
     dst_path: Optional[PathLike] = None,
     gdal_conda_env_name: str = "gdal",
-    verbose: bool = False,
+    verbose: bool = True,
 ):
     """
     Uses GDALs warp functionality to warp an image to a set of Ground Control
@@ -251,13 +251,13 @@ def warp_to_gcps(
     )
 
     gdal_warp = (
-        "gdalwarp -r near -tps -t_srs "
+        "gdalwarp -r bilinear -tps -t_srs "
         f"{prj_file} {tempfile_path} {dst_path}"
     )
 
     def run_command_in_conda_env(env_name: str, command_str: str):
         out = subprocess.run(
-            f"conda run -r bilinear -n {env_name} {command_str}".split(),
+            f"conda run -n {env_name} {command_str}".split(),
             shell=True,
             capture_output=True,
         )
