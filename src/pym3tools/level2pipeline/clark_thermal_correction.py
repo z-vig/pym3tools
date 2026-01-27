@@ -26,7 +26,7 @@ from .utils.data_fetching_utils import (
 )
 
 # Top-level imports
-from pym3tools.io.read_m3 import read_m3, Window
+from pym3tools.io.read_m3_binary import read_m3, Window
 from pym3tools.io.read_m3_georef import read_m3_georef
 from pym3tools.formats.m3_data_format import SUP
 

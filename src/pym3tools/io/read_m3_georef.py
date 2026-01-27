@@ -4,7 +4,7 @@ from typing import TypedDict
 from functools import partial
 
 # Relative Imports
-from .read_m3 import read_m3
+from .read_m3_binary import read_m3
 
 # Dependencies
 import numpy as np

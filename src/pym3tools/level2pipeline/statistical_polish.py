@@ -14,7 +14,7 @@ from .step import Step, PipelineState, StepCompletionState
 
 # Top-Level Imports
 from pym3tools.PDSretrieval.file_manager import M3FileManager
-from pym3tools.io.read_m3 import get_wavelengths
+from pym3tools.io.read_m3_binary import get_wavelengths
 
 TimeRange = Tuple[datetime, datetime]
 PathLike = str | os.PathLike | Path

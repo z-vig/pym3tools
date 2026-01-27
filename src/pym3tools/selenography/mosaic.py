@@ -23,6 +23,7 @@ def mosaic_arrays(
     save_path: PathLike,
     band_lbls: Optional[list] = None,
     wavelength_field: bool = False,
+    bbl: Optional[list[bool]] = None,
 ):
     """
     Writes a list of images to disk as a single composite image.
@@ -56,15 +57,6 @@ def mosaic_arrays(
 
     mosaic, mosaic_transform = merge(mosaic_list, method="max")
     profile = mosaic_list[0].profile.copy()
-    profile.update(
-        {
-            "driver": "ENVI",
-            "height": mosaic.shape[1],
-            "width": mosaic.shape[2],
-            "transform": mosaic_transform,
-            "nodata": -999,
-        }
-    )
 
     print(f"Writing mosaic of size: {mosaic.shape} to {save_path}")
 
@@ -77,4 +69,5 @@ def mosaic_arrays(
         dst_path=save_path,
         save_mode="ENVI",
         wavelength_field=wavelength_field,
+        bbl=bbl,
     )

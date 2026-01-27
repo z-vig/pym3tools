@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class AcqTypeFormat():
+class AcqTypeFormat:
     """
     Describes the format of a single M3 acquisition type.
 
@@ -19,6 +19,7 @@ class AcqTypeFormat():
     header_length : int
         Length of the file header in bytes.
     """
+
     nbands: int
     ncols: int
     dtype: str
@@ -26,7 +27,7 @@ class AcqTypeFormat():
 
 
 @dataclass
-class M3DataFormat():
+class M3DataFormat:
     """
     Stores data about how M3 image files are stored in the .IMG binary format.
 
@@ -43,6 +44,7 @@ class M3DataFormat():
         L0.global  # Returns `global_fmt` attribute
         L0.targeted  # Returns `targeted_fmt` attribute
     """
+
     global_fmt: AcqTypeFormat
     targeted_fmt: AcqTypeFormat
 
@@ -57,31 +59,25 @@ class M3DataFormat():
 
 
 L0 = M3DataFormat(
-    AcqTypeFormat(86, 320, "<h", 1280),
-    AcqTypeFormat(260, 640, "<h", 1280)
+    AcqTypeFormat(86, 320, "<h", 1280), AcqTypeFormat(260, 640, "<h", 1280)
 )
 
 L1 = M3DataFormat(
-    AcqTypeFormat(85, 304, "<f", 0),
-    AcqTypeFormat(256, 608, "<f", 0)
+    AcqTypeFormat(85, 304, "<f", 0), AcqTypeFormat(256, 608, "<f", 0)
 )
 
 L2 = M3DataFormat(
-    AcqTypeFormat(85, 304, "<f", 0),
-    AcqTypeFormat(256, 608, "<f", 0)
+    AcqTypeFormat(85, 304, "<f", 0), AcqTypeFormat(256, 608, "<f", 0)
 )
 
 LOC = M3DataFormat(
-    AcqTypeFormat(3, 304, "<d", 0),
-    AcqTypeFormat(3, 608, "<d", 0)
+    AcqTypeFormat(3, 304, "<d", 0), AcqTypeFormat(3, 608, "<d", 0)
 )
 
 OBS = M3DataFormat(
-    AcqTypeFormat(10, 304, "<f", 0),
-    AcqTypeFormat(10, 608, "<f", 0)
+    AcqTypeFormat(10, 304, "<f", 0), AcqTypeFormat(10, 608, "<f", 0)
 )
 
 SUP = M3DataFormat(
-    AcqTypeFormat(3, 304, "<f", 0),
-    AcqTypeFormat(3, 608, "<f", 0)
+    AcqTypeFormat(3, 304, "<f", 0), AcqTypeFormat(3, 608, "<f", 0)
 )

@@ -34,6 +34,20 @@ def read_m3(
     acq_type: str,
     window: Optional[Window] = None,
 ):
+    """
+    Reads binary M3 data from the PDS.
+
+    Parameters
+    ----------
+    img_path: str | os.PathLike
+        Filepath to M3 binary data file.
+    data_format: M3DataFormat
+        Format of the M3 data.
+    acq_type:
+        Acquisition type, global or targeted.
+    window: rasterio.Window, optional
+        Window to read the data from.
+    """
     img_path = Path(img_path)
 
     nbands = getattr(data_format, acq_type).nbands
@@ -110,8 +124,6 @@ def get_wavelengths(
         M3 File Config object.
     rfl_hdr: str | os.PathLike
         Path to reflectance header file.
-    acq_type: str
-        Either `"global"` or `"targeted"`.
 
     Returns
     -------
