@@ -95,6 +95,7 @@ class Georeference(Step):
         new_state = PipelineState(
             data=cropped_rdn,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=cropped_obs,
             georef=state.georef,
             flags=new_flags,

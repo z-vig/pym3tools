@@ -8,6 +8,10 @@ from .utils.data_fetching_utils import get_solar_correction_values
 
 
 class SolarSpectrumRemoval(Step):
+    def __init__(self, name: str, drop_bbl: bool = False, **kwargs):
+        super().__init__(name, **kwargs)
+        self.drop_bbl: bool = drop_bbl
+
     def run(self, state: PipelineState) -> PipelineState:
         self.solar_spec, solar_wvl, solar_distance = (
             get_solar_correction_values(self.manager)
@@ -28,6 +32,7 @@ class SolarSpectrumRemoval(Step):
         new_state = PipelineState(
             data=solar_spec_removed,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=state.obs,
             georef=state.georef,
             flags=new_flags,

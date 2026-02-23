@@ -53,6 +53,7 @@ class PipelineFlags:
 class PipelineState:
     data: np.ndarray
     wvl: np.ndarray
+    bbl: np.ndarray
     obs: np.ndarray
     georef: GeorefData
     flags: PipelineFlags
@@ -104,6 +105,7 @@ class Step:
             g.create_dataset("data", data=output.data, dtype="f4")
             g.create_dataset("obs", data=output.obs, dtype="f4")
             g.attrs["wavelengths"] = output.wvl
+            g.attrs["bbl"] = output.bbl
             g.attrs["pipeline_flags"] = [
                 getattr(output.flags, i.name).value
                 for i in output.flags.__dataclass_fields__.values()

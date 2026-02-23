@@ -205,7 +205,7 @@ def warp_to_gcps(
     gcps: List[GroundControlPoint],
     dst_path: Optional[PathLike] = None,
     gdal_conda_env_name: str = "gdal",
-    verbose: bool = True,
+    verbose: bool = False,
 ):
     """
     Uses GDALs warp functionality to warp an image to a set of Ground Control

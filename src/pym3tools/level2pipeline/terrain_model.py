@@ -132,6 +132,7 @@ class TerrainModel(Step):
         new_state = PipelineState(
             data=state.data,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=new_obs,
             georef=state.georef,
             flags=new_flags,

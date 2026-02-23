@@ -18,6 +18,7 @@ class SolarSpectrumReadError(Exception):
 
 def get_solar_correction_values(
     manager: M3FileManager,
+    drop_bbl: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """
     Returns solar spectrum, solar wavelengths and solar distance.
@@ -29,14 +30,20 @@ def get_solar_correction_values(
             [re.findall(solspec_parse, i) for i in f.readlines()],
             dtype=np.float32,
         )
-        solar_wvl = data_array[bbl, 0]
-        solar_spec = data_array[bbl, 1]
+        if drop_bbl:
+            test_wvl = wvl[bbl]
+            solar_wvl = data_array[bbl, 0]
+            solar_spec = data_array[bbl, 1]
+        else:
+            test_wvl = wvl
+            solar_wvl = data_array[:, 0]
+            solar_spec = data_array[:, 1]
 
     solar_distance_pattern = re.compile(r"SOLAR_DISTANCE\s*=\s(\d.\d*)\s<AU>")
     with open(manager.pds_dir.l1.lbl) as f:
         solar_distance = float(re.findall(solar_distance_pattern, f.read())[0])
 
-    if not np.allclose(solar_wvl, wvl[bbl]):
+    if not np.allclose(solar_wvl, test_wvl):
         raise SolarSpectrumReadError(
             "The solar spectrum wavelength values do not match the data"
             "wavelength values."
@@ -45,7 +52,9 @@ def get_solar_correction_values(
     return solar_spec, solar_wvl, solar_distance
 
 
-def get_phase_function_rgi(manager) -> RegularGridInterpolator:
+def get_phase_function_rgi(
+    manager, drop_bbl: bool = False
+) -> RegularGridInterpolator:
     pattern = re.compile(r"\s\d.\d{9}")
     _, bbl = get_wavelengths(manager)
     with open(manager.cal_dir.phase_function) as f:
@@ -53,7 +62,9 @@ def get_phase_function_rgi(manager) -> RegularGridInterpolator:
             [re.findall(pattern, i) for i in f.readlines()[1:]],
             dtype=np.float32,
         )
-        phase_function_lookup = phase_function_lookup[:100, bbl]
+        phase_function_lookup = phase_function_lookup[:100, :]
+        if drop_bbl:
+            phase_function_lookup = phase_function_lookup[:, bbl]
 
     x = np.arange(phase_function_lookup.shape[0])
     y = np.arange(phase_function_lookup.shape[1])

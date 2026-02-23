@@ -62,8 +62,9 @@ def check_instrument_temp(
 
 
 class StatisticalPolish(Step):
-    def __init__(self, name: str, **kwargs) -> None:
+    def __init__(self, name: str, drop_bbl: bool = False, **kwargs) -> None:
         super().__init__(name, **kwargs)
+        self.drop_bbl = drop_bbl
 
     def run(self, state: PipelineState) -> PipelineState:
 
@@ -102,8 +103,11 @@ class StatisticalPolish(Step):
             data_array = np.array(
                 re.findall(stat_pol_tab_pattern, f.read()), dtype=np.float32
             )
-            stat_pol_wvl = data_array[bbl, 0]
-            self.stat_pol_coefs = data_array[bbl, 1]
+            stat_pol_wvl = data_array[:, 0]
+            self.stat_pol_coefs = data_array[:, 1]
+            if self.drop_bbl:
+                stat_pol_wvl = stat_pol_wvl[bbl]
+                self.stat_pol_coefs = self.stat_pol_coefs[bbl]
 
         if not np.allclose(stat_pol_wvl, state.wvl):
             raise StatisticalPolishFileError(
@@ -121,6 +125,7 @@ class StatisticalPolish(Step):
         new_state = PipelineState(
             data=statisical_polish_applied,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=state.obs,
             georef=state.georef,
             flags=new_flags,

@@ -44,12 +44,14 @@ class ClarkThermalCorrection(Step):
         name,
         max_iterations: int = 12,
         use_pds_temperatures: bool = False,
+        drop_bbl: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(name, **kwargs)
         self.max_iterations = max_iterations
         self.use_pds_temperatures = use_pds_temperatures
         self.method = ThermalCorrectionMethod.Clark
+        self.drop_bbl = drop_bbl
 
     def _load_context_variables(
         self, state: PipelineState
@@ -113,7 +115,7 @@ class ClarkThermalCorrection(Step):
 
         # Getting geometry correction factors
         self.cos_correction = cosine_correction(state.obs[:, :, 0])
-        rgi = get_phase_function_rgi(self.manager)
+        rgi = get_phase_function_rgi(self.manager, drop_bbl=self.drop_bbl)
         self.phase_function, _ = compute_f_alpha(
             state.obs[:, :, 2], rgi, state.data.shape[-1]
         )
@@ -173,6 +175,7 @@ class ClarkThermalCorrection(Step):
             new_state = PipelineState(
                 data=state.data - thermal_spec,
                 wvl=state.wvl,
+                bbl=state.bbl,
                 obs=state.obs,
                 georef=state.georef,
                 flags=new_flags,
@@ -250,6 +253,7 @@ class ClarkThermalCorrection(Step):
         new_state = PipelineState(
             data=self.final_correction,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=state.obs,
             georef=state.georef,
             flags=new_flags,

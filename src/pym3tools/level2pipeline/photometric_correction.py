@@ -27,6 +27,7 @@ class PhotometricCorrection(Step):
         new_state = PipelineState(
             data=self.photometric_coefficients * state.data,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=state.obs,
             georef=state.georef,
             flags=new_flags,

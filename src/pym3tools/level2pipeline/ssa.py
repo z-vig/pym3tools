@@ -23,6 +23,7 @@ class ConvertToSSA(Step):
         new_state = PipelineState(
             data=ssa,
             wvl=state.wvl,
+            bbl=state.bbl,
             obs=state.obs,
             georef=state.georef,
             flags=new_flags,

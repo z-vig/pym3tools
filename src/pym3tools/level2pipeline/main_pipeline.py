@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Sequence
 
 # Dependencies
-# from rasterio.coords import BoundingBox
+import numpy as np
 
 # Relative Imports
 from .step import Step, PipelineState, PipelineFlags
@@ -24,7 +24,12 @@ class M3Level2Pipeline:
     Planetary Data System.
     """
 
-    def __init__(self, steps: Sequence[Step], manager: M3FileManager) -> None:
+    def __init__(
+        self,
+        steps: Sequence[Step],
+        manager: M3FileManager,
+        drop_bad_bands: bool = False,
+    ) -> None:
         self.steps = steps
         for step in self.steps:
             step.set_file_manager(manager)
@@ -35,13 +40,15 @@ class M3Level2Pipeline:
         wvl, bbl = get_wavelengths(manager)
 
         # Getting rid of bad bands
-        data = data[:, :, bbl]
-        wvl = wvl[bbl]
+        if drop_bad_bands:
+            data = data[:, :, bbl]
+            wvl = wvl[bbl]
+            bbl = np.ones(wvl.size)
 
         georef = GeorefData.from_numpy(data)
         flags = PipelineFlags.default()
 
-        self.state = PipelineState(data, wvl, obs, georef, flags)
+        self.state = PipelineState(data, wvl, bbl, obs, georef, flags)
 
     def run(self) -> PipelineState:
         state = self.state
