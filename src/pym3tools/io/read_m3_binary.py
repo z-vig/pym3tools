@@ -2,7 +2,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 import os
-from typing import Optional, Sequence, Tuple, Mapping
+from typing import Optional, Tuple, Mapping
+import re
 
 # Top-Level Imports
 from pym3tools.PDSretrieval import M3FileManager
@@ -147,20 +148,19 @@ def get_wavelengths(
     else:
         raise ValueError("Either `file_config` or `rfl_hdr` must be provided.")
 
-    loc_key = "wavelength = {"  # wavelength list
-    bbl_key = "bbl = {"  # Band Bands List
+    wvl_key = re.compile(r"wavelength\s*=\s*{([\s\S]*?)}")  # wavelength list
+    bbl_key = re.compile(r"bbl\s*=\s*{([\s\S]*?)}")  # Band Bands List
 
-    def parse_list(file_read: str, start_string: str) -> Sequence[float | int]:
-        idx_start = file_read.find(start_string)
-        idx_end = file_read.find("}", idx_start)
-        str_list = file_read[idx_start:idx_end].split("\n")[1:]
-        num_list = [
-            float(i.replace(" ", "").replace(",", "")) for i in str_list
-        ]
+    def parse_list(file_read: str, pattern: re.Pattern) -> list[str]:
+        result = re.search(pattern, file_read)
+        if result is None:
+            raise ValueError(f"Invalid HDR Format at: {rfl_hdr_path}")
+        list_str = result.groups()[0]
+        num_list = re.split(r",\s*\n*", list_str)
         return num_list
 
     with open(rfl_hdr_path, "r") as f:
         fread = f.read()
-        wavelengths = parse_list(fread, loc_key)
-        bbl = parse_list(fread, bbl_key)
+        wavelengths = [float(i) for i in parse_list(fread, wvl_key)]
+        bbl = [int(i) for i in parse_list(fread, bbl_key)]
     return np.array(wavelengths, dtype=np.float32), np.array(bbl, dtype=bool)

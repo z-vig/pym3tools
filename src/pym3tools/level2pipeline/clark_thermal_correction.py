@@ -1,11 +1,14 @@
 # Standard Libraries
 from typing import Tuple
 from enum import Enum
+from pathlib import Path
 
 # Dependencies
 import numpy as np
 import h5py as h5  # type: ignore
-from rasterio.coords import BoundingBox  # type: ignore
+from cubio.geotools.georeference_from_gcps import georeference_image
+from cubio.geotools.georeference_satellite_swath import ProjectionDefinition
+from cubio.data.crs_wkt_strings import GeographicCRS
 
 # Relative Imports
 from .step import Step, PipelineState, StepCompletionState
@@ -24,11 +27,6 @@ from .utils.data_fetching_utils import (
     get_solar_correction_values,
     get_phase_function_rgi,
 )
-
-# Top-level imports
-from pym3tools.io.read_m3_binary import read_m3, Window
-from pym3tools.io.read_m3_georef import read_m3_georef
-from pym3tools.formats.m3_data_format import SUP
 
 
 class ThermalCorrectionMethod(Enum):
@@ -125,32 +123,32 @@ class ClarkThermalCorrection(Step):
             (*state.data.shape[:2], self.max_iterations + 1), np.nan
         )
 
+        print(
+            "TEST BBOX: ",
+            state.georef.left_bound,
+            state.georef.bottom_bound,
+            state.georef.right_bound,
+            state.georef.top_bound,
+        )
+
         if self.use_pds_temperatures:
             print(
                 "Skipping iterative temperature solution, using pre-defined"
                 " temperature values."
             )
-            if state.flags.georeferenced.name == "Incomplete":
-                window = Window(
-                    state.georef.col_offset,
-                    state.georef.col_offset,
-                    state.georef.width,
-                    state.georef.height,
-                )
-                pds_temps = read_m3(
-                    self.manager.pds_dir.l2.sup_img,
-                    SUP,
-                    self.manager.acq_type,
-                    window=window,
-                )[:, :, 1]
-            else:
-                bbox = BoundingBox(
-                    left=state.georef.left_bound,
-                    bottom=state.georef.bottom_bound,
-                    right=state.georef.right_bound,
-                    top=state.georef.top_bound,
-                )
-                pds_temps = read_m3_georef(self.manager, bbox, "SUP")[:, :, 1]
+            prj4 = ProjectionDefinition(
+                "GruithuisenRegion",
+                "LunarGeographic",
+                "GCS coordinates for the Moon",
+                proj4_str="+proj=longlat +R=1737400 +no_defs +type=crs",
+                crs_wkt_str=GeographicCRS.GCS_MOON_2000,
+            )
+            sup_data, _ = georeference_image(
+                Path(self.manager.pds_dir.l2.sup_img).with_suffix(".json"),
+                Path(self.manager.georef_dir.gcps),
+                prj4,
+            )
+            pds_temps = sup_data[:, :, 1]  # Choosing temperature frame
 
             pds_temps[pds_temps == 0.1] = np.nan
             pds_temps[pds_temps == -999] = np.nan

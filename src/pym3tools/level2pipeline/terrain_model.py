@@ -128,6 +128,13 @@ class TerrainModel(Step):
             ],
             axis=2,
         )
+        print(
+            "TEST BBOX: ",
+            state.georef.left_bound,
+            state.georef.bottom_bound,
+            state.georef.right_bound,
+            state.georef.top_bound,
+        )
 
         new_state = PipelineState(
             data=state.data,

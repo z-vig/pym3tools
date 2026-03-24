@@ -77,6 +77,8 @@ class Crop(Step):
         state.georef.height = int(height)
         state.georef.width = int(width)
 
+        print("CROP SHAPE: ", cropped_data.shape)
+
         self._new_georef = state.georef
         new_flags = state.flags
         new_flags.cropped = StepCompletionState.Complete

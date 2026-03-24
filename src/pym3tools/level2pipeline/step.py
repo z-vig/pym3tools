@@ -134,6 +134,7 @@ class Step:
             cached_state = PipelineState(
                 data=g["data"][...],  # type:ignore
                 wvl=g.attrs["wavelengths"],  # type:ignore
+                bbl=g.attrs["bbl"],  # type: ignore
                 obs=g["obs"][...],  # type:ignore
                 georef=georef,
                 flags=PipelineFlags(

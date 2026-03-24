@@ -1,19 +1,18 @@
 # Standard Libraries
 import os
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 # Dependencies
-import numpy as np
-import rasterio as rio  # type: ignore
 import yaml
+from cubio.geotools.models import ImageOffset
+from cubio.geotools.georeference_from_gcps import georeference_image
+from cubio.geotools.georeference_satellite_swath import ProjectionDefinition
+from cubio.data.crs_wkt_strings import GeographicCRS
 
 # Relative Imports
 from .step import Step, PipelineState, StepCompletionState
 
 # Top-Level Imports
-from pym3tools.selenography.gcp_utils import apply_gcps
-from pym3tools.selenography.gcp_writer import write_gcp_file_from_loc
 from pym3tools.metadata_models import AffineDict
 
 PathLike = str | os.PathLike | Path
@@ -31,72 +30,82 @@ class Georeference(Step):
 
     def run(self, state: PipelineState) -> PipelineState:
         if self.manager.analysis_scope.value == "global":
-            gcp_temp_file = NamedTemporaryFile(suffix=".gcps")
-            gcp_temp_file.close()
-            with rio.open(self.manager.pds_dir.l1.loc_img) as f:
-                loc = np.transpose(f.read(), (1, 2, 0))
-            write_gcp_file_from_loc(
-                loc,
-                gcp_temp_file.name,
-                self.manager.pds_dir.l1.rdn_img,
-                state.georef.row_offset,
-                state.georef.col_offset,
-                state.georef.height,
-                state.georef.width,
-                0,
-            )
-            self.manager.georef_dir.gcps = gcp_temp_file.name
+            raise NotImplementedError("You gotta have gcps right now.")
 
-        rdn_temp_file = NamedTemporaryFile(suffix=".tif")
-        obs_temp_file = NamedTemporaryFile(suffix=".tif")
-        rdn_temp_file.close()
-        obs_temp_file.close()
-
-        offsets = state.georef.row_offset, state.georef.col_offset
-
-        apply_gcps(
-            state.data,
-            self.manager.georef_dir.gcps,
-            rdn_temp_file.name,
-            input_array_offsets=offsets,
-            verbose=self._verbose,
+        prj4 = ProjectionDefinition(
+            "GruithuisenRegion",
+            "LunarGeographic",
+            "GCS coordinates for the Moon",
+            proj4_str="+proj=longlat +R=1737400 +no_defs +type=crs",
+            crs_wkt_str=GeographicCRS.GCS_MOON_2000,
+        )
+        georef_rdn, _ = georeference_image(
+            cubio_json_file=Path(self.manager.pds_dir.l1.rdn_img).with_suffix(
+                ".json"
+            ),
+            gcps_file=Path(self.manager.georef_dir.gcps),
+            prj_definition=prj4,
+            unref_cube_array=state.data,
+            new_gcps_offset=ImageOffset(
+                row=state.georef.row_offset,
+                column=state.georef.col_offset,
+                height=state.data.shape[0],
+                width=state.data.shape[1],
+            ),
+            apply_cropping=False,
+        )
+        georef_obs, georef_gtrans_obs = georeference_image(
+            cubio_json_file=Path(self.manager.pds_dir.l1.obs_img).with_suffix(
+                ".json"
+            ),
+            gcps_file=Path(self.manager.georef_dir.gcps),
+            prj_definition=prj4,
+            unref_cube_array=state.obs,
+            new_gcps_offset=ImageOffset(
+                row=state.georef.row_offset,
+                column=state.georef.col_offset,
+                height=state.data.shape[0],
+                width=state.data.shape[1],
+            ),
+            apply_cropping=False,
         )
 
-        apply_gcps(
-            state.obs,
-            self.manager.georef_dir.gcps,
-            obs_temp_file.name,
-            input_array_offsets=offsets,
-            verbose=self._verbose,
+        print("GEOREF SHAPE:", georef_rdn.shape)
+
+        state.georef.crs = str(prj4.crs_wkt_str)
+        _affine = georef_gtrans_obs.toaffine()
+        state.georef.geotransform = AffineDict(
+            a=_affine.a,
+            b=_affine.b,
+            c=_affine.c,
+            d=_affine.d,
+            e=_affine.e,
+            f=_affine.f,
         )
+        new_bounds = georef_gtrans_obs.get_bbox(
+            height=georef_obs.shape[0], width=georef_obs.shape[1]
+        )
+        state.georef.top_bound = new_bounds.top
+        state.georef.bottom_bound = new_bounds.bottom
+        state.georef.left_bound = new_bounds.left
+        state.georef.right_bound = new_bounds.right
 
-        with rio.open(rdn_temp_file.name, "r", driver="GTiff") as ds:
-            cropped_rdn = ds.read()
-            gtrans = ds.transform
-            state.georef.geotransform = AffineDict(
-                a=gtrans.a,
-                b=gtrans.b,
-                c=gtrans.c,
-                d=gtrans.d,
-                e=gtrans.e,
-                f=gtrans.f,
-            )
-            state.georef.crs = ds.crs.to_wkt()
-
-        with rio.open(obs_temp_file.name, "r", driver="GTiff") as ds:
-            cropped_obs = ds.read()
-
-        cropped_rdn = np.transpose(cropped_rdn, (1, 2, 0))
-        cropped_obs = np.transpose(cropped_obs, (1, 2, 0))
+        print(
+            "TEST BBOX: ",
+            state.georef.left_bound,
+            state.georef.bottom_bound,
+            state.georef.right_bound,
+            state.georef.top_bound,
+        )
 
         new_flags = state.flags
         new_flags.georeferenced = StepCompletionState.Complete
 
         new_state = PipelineState(
-            data=cropped_rdn,
+            data=georef_rdn,
             wvl=state.wvl,
             bbl=state.bbl,
-            obs=cropped_obs,
+            obs=georef_obs,
             georef=state.georef,
             flags=new_flags,
         )

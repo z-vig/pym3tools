@@ -1,22 +1,26 @@
 # Standard Libraries
-import tempfile as tf
 from typing import TypedDict
 from functools import partial
+from pathlib import Path
 
 # Relative Imports
-from .read_m3_binary import read_m3
+# from .read_m3_binary import read_m3
 
 # Dependencies
 import numpy as np
-import rasterio as rio  # type: ignore
 from rasterio.coords import BoundingBox  # type: ignore
 
 # Top-Level Imports
 import pym3tools.formats.m3_data_format as fmt
 from pym3tools.PDSretrieval.file_manager import M3FileManager
 from pym3tools.types import PathLike
-from pym3tools.selenography.crop import regional_crop
-from pym3tools.selenography.gcp_utils import apply_gcps
+
+# from pym3tools.selenography.crop import regional_crop
+
+from cubio.geotools.georeference_from_gcps import georeference_image
+from cubio.geotools.georeference_satellite_swath import ProjectionDefinition
+from cubio.data.crs_wkt_strings import GeographicCRS
+from cubio.geotools.models import BoundingBoxModel
 
 
 class M3DatasetNameError(Exception):
@@ -33,19 +37,32 @@ def _read_m3_georef(
     bbox: BoundingBox,
     gcp_path: PathLike,
 ) -> np.ndarray:
-    img = read_m3(img_path, img_data_format, acq_type)
-    loc = read_m3(loc_path, loc_data_format, acq_type)
+    # img = read_m3(img_path, img_data_format, acq_type)
+    # loc = read_m3(loc_path, loc_data_format, acq_type)
 
-    img_cropped, row_off, col_off, _, _ = regional_crop(img, loc, bbox)
+    # img_cropped, row_off, col_off, _, _ = regional_crop(img, loc, bbox)
 
-    temp = tf.NamedTemporaryFile(suffix=".tiff")
-    temp.close()
-
-    apply_gcps(img_cropped, gcp_path, temp.name, (row_off, col_off))
-
-    with rio.open(temp.name, "r", driver="GTiff") as ds:
-        img_georef = ds.read()
-        img_georef = np.transpose(img_georef, (1, 2, 0))
+    prj4 = ProjectionDefinition(
+        "GruithuisenRegion",
+        "LunarGeographic",
+        "GCS coordinates for the Moon",
+        proj4_str="+proj=longlat +R=1737400 +no_defs +type=crs",
+        crs_wkt_str=GeographicCRS.GCS_MOON_2000,
+    )
+    bbox_model = BoundingBoxModel(
+        left=bbox.left,
+        bottom=bbox.bottom,
+        right=bbox.right,
+        top=bbox.top,
+        name="pleasework",
+    )
+    img_georef, gtrans = georeference_image(
+        Path(img_path).with_suffix(".json"),
+        Path(gcp_path),
+        prj4,
+        georef_extent=bbox_model,
+        apply_cropping=True,
+    )
 
     return img_georef
 

@@ -7,7 +7,6 @@ from enum import StrEnum
 import yaml
 
 # Top-Level Imports
-from pym3tools.selenography.gcp_loaders import read_gcps
 from pym3tools.metadata_models import GeorefData
 
 
@@ -64,15 +63,3 @@ class GeorefDir:
                 f"Ground Control Points found at: {self.gcps}, analysis scope "
                 f"set to: {self.analysis_scope.name}"
             )
-            gcp_list = read_gcps(self.gcps)
-            if len(gcp_list) == 0:
-                raise GroundControlPointsEmptyError(
-                    f"{self.gcps} contains no Ground Control Points."
-                )
-
-            if len(gcp_list) > 100:
-                raise TooManyGroundControlPointsError(
-                    f"{self.gcps} contains too many Ground Control Points"
-                    f" ({len(gcp_list)}) for a command line call to GDAL for"
-                    "Windows Powershell."
-                )
