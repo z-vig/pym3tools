@@ -3,8 +3,8 @@ from typing import Generic, TypeVar, Mapping
 import h5py
 import numpy as np
 
-from pym3tools2.types import DatasetStatus
-from pym3tools2.save_models import attribute_models as attr_models
+from pym3tools.types import DatasetStatus
+from pym3tools.save_models import attribute_models as attr_models
 from .hdf5_models import (
     _get_and_validate_h5_dataset,
     _get_and_validate_h5group,

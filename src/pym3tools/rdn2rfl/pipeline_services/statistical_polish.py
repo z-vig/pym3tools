@@ -5,14 +5,14 @@ import numpy as np
 import xarray as xr
 import re
 
-from pym3tools2.data_retrieval import M3DataPaths
-from pym3tools2.rdn2rfl.step_model import PipelineState
-from pym3tools2.rdn2rfl.pipeline_state import (
+from pym3tools.data_retrieval import M3DataPaths
+from pym3tools.rdn2rfl.step_model import PipelineState
+from pym3tools.rdn2rfl.pipeline_state import (
     CompletedFlag,
     get_standard_dset_attrs,
     get_1d_dset_attrs,
 )
-from pym3tools2.save_models.pipeline_cache_schema import PipelineCache
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 
 
 @dataclass

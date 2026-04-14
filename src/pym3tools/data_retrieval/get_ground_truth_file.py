@@ -2,7 +2,7 @@ from typing import Literal, Any
 from collections.abc import Callable
 from datetime import datetime
 
-from pym3tools2.types import is_valid_acquisition_mode, acq_mode_to_char
+from pym3tools.types import is_valid_acquisition_mode, acq_mode_to_char
 
 from .download_models import TabDownload, URLPath
 from .data_directory import M3DataPaths

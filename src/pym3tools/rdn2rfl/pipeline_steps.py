@@ -4,10 +4,10 @@ from typing import Literal
 from cubio.geotools.models import BoundingBoxModel, GCPGroup
 import numpy as np
 
-from pym3tools2.constants import MOON_GCS_PRJ
-from pym3tools2.save_models import attribute_models as attrs
-from pym3tools2.data_retrieval.get_ground_truth_file import determine_warm_cold
-from pym3tools2.types import ThermalCorrectionMethod, TopoCorrectionMethod
+from pym3tools.constants import MOON_GCS_PRJ
+from pym3tools.save_models import attribute_models as attrs
+from pym3tools.data_retrieval.get_ground_truth_file import determine_warm_cold
+from pym3tools.types import ThermalCorrectionMethod, TopoCorrectionMethod
 
 from .pipeline_services import (
     crop,

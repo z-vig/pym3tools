@@ -4,7 +4,7 @@ import re
 
 
 def _generate_l0enum(savepath: Path):
-    l2_idx = files("pym3tools2.m3catalog.index_data").joinpath(
+    l2_idx = files("pym3tools.m3catalog.index_data").joinpath(
         "L0_INDEX_OP1.LBL"
     )
     col_obj_header = r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?"
@@ -26,9 +26,7 @@ def _generate_l0enum(savepath: Path):
 
 
 def _generate_l1benum(savepath: Path):
-    l1B_idx = files("pym3tools2.m3catalog.index_data").joinpath(
-        "L1B_INDEX.LBL"
-    )
+    l1B_idx = files("pym3tools.m3catalog.index_data").joinpath("L1B_INDEX.LBL")
     col_obj_header = r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?"
     col_name = re.compile(col_obj_header + r"NAME\s*=\s\"?(\w+(?::\w+)?)")
     with l1B_idx.open() as f:
@@ -48,7 +46,7 @@ def _generate_l1benum(savepath: Path):
 
 
 def _generate_l2enum(savepath: Path):
-    l2_idx = files("pym3tools2.m3catalog.index_data").joinpath("L2_INDEX.LBL")
+    l2_idx = files("pym3tools.m3catalog.index_data").joinpath("L2_INDEX.LBL")
     col_obj_header = r"\sOBJECT\s*=\sCOLUMN(?:.|\n)*?"
     col_name = re.compile(col_obj_header + r"NAME\s*=\s\"?(\w+(?::\w+)?)")
     with l2_idx.open() as f:

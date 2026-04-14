@@ -6,8 +6,8 @@ from cubio import cubedata_from_json_file
 import numpy as np
 import xarray as xr
 
-from pym3tools2.data_retrieval import M3DataPaths
-from pym3tools2.constants import DEG2RAD
+from pym3tools.data_retrieval import M3DataPaths
+from pym3tools.constants import DEG2RAD
 from .data_transfer_classes import GeoreferencingGeometry
 
 

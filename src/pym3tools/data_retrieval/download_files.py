@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pym3tools2.m3catalog import DataIDString
+from pym3tools.m3catalog import DataIDString
 from .data_directory import M3DataPaths, init_data_dir
 from .download_models import Downloadable
 from .config_download_paths import (

@@ -1,12 +1,12 @@
 import numpy as np
 
-from pym3tools2.rdn2rfl.pipeline_state import (
+from pym3tools.rdn2rfl.pipeline_state import (
     PipelineState,
     CompletedFlag,
 )
-from pym3tools2.data_retrieval.data_directory import M3DataPaths
-from pym3tools2.save_models.pipeline_cache_schema import PipelineCache
-from pym3tools2.types import ThermalCorrectionMethod
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
+from pym3tools.types import ThermalCorrectionMethod
 
 from .base_thermal_correction import BaseCorrection
 from .clark import Clark

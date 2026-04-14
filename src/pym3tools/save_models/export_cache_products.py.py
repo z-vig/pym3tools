@@ -6,8 +6,8 @@ from cubio.types import NumpyDType
 import numpy as np
 import xarray as xr
 
-from pym3tools2.save_models.pipeline_cache_schema import Dataset
-from pym3tools2.save_models.attribute_models import StandardDatasetAttrs
+from pym3tools.save_models.pipeline_cache_schema import Dataset
+from pym3tools.save_models.attribute_models import StandardDatasetAttrs
 
 
 def cache_to_cubio(

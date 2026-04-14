@@ -1,7 +1,7 @@
 from cubio import cubedata_from_envi_file
 from pathlib import Path
 from .data_directory import M3DataPaths
-from pym3tools2.types import DataLevel
+from pym3tools.types import DataLevel
 
 
 def _write_json(fp: Path, name: str):

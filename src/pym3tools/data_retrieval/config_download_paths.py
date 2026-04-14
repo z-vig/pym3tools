@@ -1,7 +1,7 @@
 from pathlib import Path
 from functools import partial
 
-from pym3tools2.m3catalog import (
+from pym3tools.m3catalog import (
     DataIDString,
     get_l0_metadata,
     get_l1_metadata,

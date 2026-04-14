@@ -1,5 +1,5 @@
 from typing import TypedDict, Literal
-from pym3tools2.types import ThermalCorrectionMethod, TopoCorrectionMethod
+from pym3tools.types import ThermalCorrectionMethod, TopoCorrectionMethod
 
 
 class StandardDatasetAttrs(TypedDict):

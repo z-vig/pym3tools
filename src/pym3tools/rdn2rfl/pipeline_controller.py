@@ -6,16 +6,16 @@ import h5py
 import numpy as np
 from pyresample.geometry import SwathDefinition, AreaDefinition
 
-from pym3tools2.data_retrieval.data_directory import M3DataPaths
-from pym3tools2.save_models.pipeline_cache_schema import (
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.save_models.pipeline_cache_schema import (
     PipelineCache,
     PIPELINE_SCHEMA,
 )
-from pym3tools2.rdn2rfl.retrieve_terrain_data import (
+from pym3tools.rdn2rfl.retrieve_terrain_data import (
     load_sphere_geometry_data,
     replace_terrain,
 )
-from pym3tools2.constants import MOON_GCS_PRJ
+from pym3tools.constants import MOON_GCS_PRJ
 
 from .step_model import Step, PipelineState
 

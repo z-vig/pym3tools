@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from pym3tools2.m3catalog.column_metadata import ColumnMetadata
-from pym3tools2.m3catalog.m3_data_id import M3DataID
-from pym3tools2.types import OpticalPeriod
+from pym3tools.m3catalog.column_metadata import ColumnMetadata
+from pym3tools.m3catalog.m3_data_id import M3DataID
+from pym3tools.types import OpticalPeriod
 
 l0_op1 = (
     Path(__file__).parent
     / "src"
-    / "pym3tools2"
+    / "pym3tools"
     / "m3catalog"
     / "index_data"
     / "L0_INDEX_OP1.TAB"
@@ -16,7 +16,7 @@ l0_op1 = (
 l0_op2 = (
     Path(__file__).parent
     / "src"
-    / "pym3tools2"
+    / "pym3tools"
     / "m3catalog"
     / "index_data"
     / "L0_INDEX_OP2.TAB"
@@ -25,7 +25,7 @@ l0_op2 = (
 l1b = (
     Path(__file__).parent
     / "src"
-    / "pym3tools2"
+    / "pym3tools"
     / "m3catalog"
     / "index_data"
     / "L1B_INDEX.TAB"
@@ -34,7 +34,7 @@ l1b = (
 l2 = (
     Path(__file__).parent
     / "src"
-    / "pym3tools2"
+    / "pym3tools"
     / "m3catalog"
     / "index_data"
     / "L2_INDEX.TAB"

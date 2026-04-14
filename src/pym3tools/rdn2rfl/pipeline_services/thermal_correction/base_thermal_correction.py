@@ -1,9 +1,9 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-from pym3tools2.data_retrieval.data_directory import M3DataPaths
-from pym3tools2.rdn2rfl.pipeline_state import PipelineState
-from pym3tools2.save_models.pipeline_cache_schema import PipelineCache
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.rdn2rfl.pipeline_state import PipelineState
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 
 
 class BaseCorrection(ABC):

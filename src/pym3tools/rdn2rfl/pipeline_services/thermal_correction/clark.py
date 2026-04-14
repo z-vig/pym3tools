@@ -18,13 +18,13 @@ from dataclasses import dataclass, field, MISSING
 
 import numpy as np
 
-from pym3tools2.constants import h, k_b, c
-from pym3tools2.data_retrieval.data_directory import M3DataPaths
-from pym3tools2.rdn2rfl.pipeline_services.solar_removal import (
+from pym3tools.constants import h, k_b, c
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.rdn2rfl.pipeline_services.solar_removal import (
     retrieve_solar_data,
 )
-from pym3tools2.rdn2rfl.pipeline_state import PipelineState
-from pym3tools2.save_models.pipeline_cache_schema import PipelineCache
+from pym3tools.rdn2rfl.pipeline_state import PipelineState
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 from .base_thermal_correction import BaseCorrection
 
 

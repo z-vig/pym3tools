@@ -4,7 +4,7 @@ from typing import Self
 import h5py
 import numpy as np
 
-from pym3tools2.types import DatasetStatus
+from pym3tools.types import DatasetStatus
 
 
 def _get_and_validate_h5_dataset(

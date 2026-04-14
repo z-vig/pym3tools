@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Self
 import re
 
-from pym3tools2.types import (
+from pym3tools.types import (
     AcquisitionMode,
     acq_char_to_mode,
     acq_mode_to_char,

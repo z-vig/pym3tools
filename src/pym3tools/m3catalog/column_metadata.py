@@ -97,7 +97,7 @@ class ColumnMetadata:
         index_name: str,
     ) -> Self:
         """Create ColumnMetadata from an index file."""
-        idx_data_dir = files("pym3tools2.m3catalog.index_data")
+        idx_data_dir = files("pym3tools.m3catalog.index_data")
         idx_lbl = idx_data_dir.joinpath(f"{index_name}.LBL")
         idx_tab = idx_data_dir.joinpath(f"{index_name}.TAB")
         return cls(**_parse_index_label(idx_lbl, col_name), tab_file=idx_tab)

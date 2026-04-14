@@ -7,12 +7,12 @@ from cubio.geotools.models import GeotransformModel
 
 from .data_transfer_classes import GeoreferencingGeometry
 
-from pym3tools2.save_models.attribute_models import (
+from pym3tools.save_models.attribute_models import (
     StandardDatasetAttrs,
     OneDimensionDatasetAttrs,
 )
-from pym3tools2.constants import MOON_GCS_PRJ
-from pym3tools2.rdn2rfl.retrieve_terrain_data import M3Geometry
+from pym3tools.constants import MOON_GCS_PRJ
+from pym3tools.rdn2rfl.retrieve_terrain_data import M3Geometry
 
 
 class StepCompletionState(IntFlag):

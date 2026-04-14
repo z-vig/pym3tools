@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from typing import ClassVar, Self
 
-from pym3tools2.rdn2rfl.pipeline_state import (
+from pym3tools.rdn2rfl.pipeline_state import (
     PipelineState,
     CompletedFlag,
     get_standard_dset_attrs,
 )
-from pym3tools2.constants import MOON_RADIUS
-from pym3tools2.save_models.pipeline_cache_schema import PipelineCache
-from pym3tools2.data_retrieval.data_directory import M3DataPaths
-from pym3tools2.rdn2rfl.retrieve_terrain_data import (
+from pym3tools.constants import MOON_RADIUS
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.rdn2rfl.retrieve_terrain_data import (
     resample_m3geom,
     # crop_m3geom,
 )

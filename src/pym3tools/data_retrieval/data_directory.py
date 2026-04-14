@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Self
 from warnings import warn
 
-from pym3tools2.m3catalog import DataIDString, is_valid_data_id, M3DataID
+from pym3tools.m3catalog import DataIDString, is_valid_data_id, M3DataID
 
 
 def init_data_dir(

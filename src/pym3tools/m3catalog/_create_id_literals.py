@@ -1,6 +1,6 @@
 # flake8: noqa
 import numpy as np
-from pym3tools2.m3catalog.list_m3_products import ALL_M3_PRODUCTS
+from pym3tools.m3catalog.list_m3_products import ALL_M3_PRODUCTS
 
 l0_product_ids = np.zeros(0, dtype="|S18")
 l1_product_ids = np.zeros(0, dtype="|S18")

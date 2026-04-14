@@ -1,10 +1,10 @@
 from typing import overload
-from pym3tools2.m3catalog import DataIDString
-from pym3tools2.m3catalog import ColumnMetadata
-from pym3tools2.m3catalog import M3DataID
-from pym3tools2.m3catalog.l0_columns_names import L0ColumnName
-from pym3tools2.m3catalog.l1b_columns_names import L1BColumnName
-from pym3tools2.m3catalog.l2_columns_names import L2ColumnName
+from pym3tools.m3catalog import DataIDString
+from pym3tools.m3catalog import ColumnMetadata
+from pym3tools.m3catalog import M3DataID
+from pym3tools.m3catalog.l0_columns_names import L0ColumnName
+from pym3tools.m3catalog.l1b_columns_names import L1BColumnName
+from pym3tools.m3catalog.l2_columns_names import L2ColumnName
 
 
 def _get_metadata(
