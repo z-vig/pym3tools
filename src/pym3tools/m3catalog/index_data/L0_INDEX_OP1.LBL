@@ -1,0 +1,459 @@
+PDS_VERSION_ID             = PDS3                                             
+RECORD_TYPE                = FIXED_LENGTH                                     
+RECORD_BYTES               = 863                                              
+FILE_RECORDS               = 633                                              
+^INDEX_TABLE               = "L0_INDEX.TAB"                                   
+VOLUME_ID                  = "CH1M3_0001"                                     
+DATA_SET_ID                = "CH1-ORB-L-M3-2-L0-RAW-V1.0"                     
+INSTRUMENT_HOST_NAME       = "CHANDRAYAAN-1 ORBITER"                          
+INSTRUMENT_NAME            = "MOON MINERALOGY MAPPER"                         
+                                                                              
+OBJECT                     = INDEX_TABLE                                      
+  INTERCHANGE_FORMAT       = ASCII                                            
+  ROW_BYTES                = 863                                              
+  ROWS                     = 633                                              
+  COLUMNS                  = 41                                               
+  INDEX_TYPE               = SINGLE                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+      COLUMN_NUMBER        = 1                                                
+      NAME                 = VOLUME_ID                                        
+      DATA_TYPE            = CHARACTER                                        
+      START_BYTE           = 2                                                
+      BYTES                = 12                                               
+      FORMAT               = "A12"                                            
+      DESCRIPTION          = "The identifier of the volume on which the       
+                              product is stored."                             
+    END_OBJECT             = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 2                                                
+    NAME                   = PRODUCT_ID                                       
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 17                                               
+    BYTES                  = 30                                               
+    FORMAT                 = "A30"                                            
+    DESCRIPTION            = "A permanent, unique identifier assigned to a    
+                              data product by its producer."                  
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 3                                                
+    NAME                   = PRODUCT_TYPE                                     
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 50                                               
+    BYTES                  = 20                                               
+    FORMAT                 = "A20"                                            
+    DESCRIPTION            = "The type or category of a product within a data 
+                              set. Level 0 = L0 and Level 1B = L1B."          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 4                                                
+    NAME                   = FILE_SPECIFICATION_NAME                          
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             =  73                                              
+    BYTES                  =  71                                              
+    FORMAT                 = "A71"                                            
+    DESCRIPTION            = "The full name of a file, including a path name, 
+                              relative to a PDS volume.  It excludes node or  
+                              volume location. "                              
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 5                                                
+    NAME                   = PRODUCT_CREATION_TIME                            
+    DATA_TYPE              = TIME                                             
+    START_BYTE             = 146                                              
+    BYTES                  = 21                                               
+    DESCRIPTION            = "UTC date and time when this product was         
+                              created, in the format                          
+                              yyyy-mm-ddThh:mm:ss."                           
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 6                                                
+    NAME                   = START_TIME                                       
+    DATA_TYPE              = TIME                                             
+    START_BYTE             = 168                                              
+    BYTES                  = 21                                               
+    DESCRIPTION            = "UTC date and time at the beginning              
+                              of data acquisition for this product,           
+                              in the format yyyy-mm-ddThh:mm:ss."             
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 7                                                
+    NAME                   = STOP_TIME                                        
+    DATA_TYPE              = TIME                                             
+    START_BYTE             = 190                                              
+    BYTES                  = 21                                               
+    DESCRIPTION            = "UTC date and time at the end of                 
+                              data acquisition for this product,              
+                              in the format yyyy-mm-ddThh:mm:ss."             
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 8                                                
+    NAME                   = SPACECRAFT_CLOCK_START_COUNT                     
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 213                                              
+    BYTES                  = 16                                               
+    FORMAT                 = "A16"                                            
+    DESCRIPTION            = "The value of the spacecraft clock at the        
+                              beginning of a time period of interest."        
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 9                                                
+    NAME                   = SPACECRAFT_CLOCK_STOP_COUNT                      
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 232                                              
+    BYTES                  = 16                                               
+    FORMAT                 = "A16"                                            
+    DESCRIPTION            = "The value of the spacecraft clock at the end of 
+                              a time period of interest."                     
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 10                                               
+    NAME                   = ORBIT_NUMBER                                     
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 250                                              
+    BYTES                  = 5                                                
+    FORMAT                 = "A5"                                             
+    DESCRIPTION            = "The number of the orbital revolution of the     
+                              spacecraft around a target body."               
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  OBJECT                   = COLUMN                                           
+    COLUMN_NUMBER          = 11                                               
+    NAME                   = INSTRUMENT_MODE_ID                               
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 257                                              
+    BYTES                  = 7                                                
+    FORMAT                 = "A7"                                             
+    DESCRIPTION            = "The instrument mode at the time of observation."
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 12                                               
+    NAME                   = "CH1:SWATH_WIDTH"                                
+    DATA_TYPE              = ASCII_INTEGER                                    
+    START_BYTE             = 266                                              
+    BYTES                  = 5                                                
+    DESCRIPTION            = "The total number of pixels in the horizontal    
+                              position of an image."                          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 13                                               
+    NAME                   = "CH1:SWATH_LENGTH"                               
+    DATA_TYPE              = ASCII_INTEGER                                    
+    START_BYTE             = 272                                              
+    BYTES                  = 7                                                
+    DESCRIPTION            = "The total number of pixels in the vertical      
+                              position of an image."                          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 14                                               
+    NAME                   = LINES                                            
+    DATA_TYPE              = ASCII_INTEGER                                    
+    START_BYTE             = 280                                              
+    BYTES                  = 7                                                
+    DESCRIPTION            = "The total number of data instances along the    
+                              vertical axis of an image."                     
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 15                                               
+    NAME                   = LINE_SAMPLES                                     
+    DATA_TYPE              = ASCII_INTEGER                                    
+    START_BYTE             = 288                                              
+    BYTES                  = 5                                                
+    DESCRIPTION            = "The total number of data instances along the    
+                              horizontal axis of an image."                   
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 16                                               
+    NAME                   = BANDS                                            
+    DATA_TYPE              = ASCII_INTEGER                                    
+    START_BYTE             = 294                                              
+    BYTES                  = 8                                                
+    DESCRIPTION            = "The number of spectral bands in an image."      
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 17                                               
+    NAME                   = PDS_VERSION_ID                                   
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 304                                              
+    BYTES                  = 5                                                
+    FORMAT                 = "A5"                                             
+    DESCRIPTION            = "PDS Version ID"                                 
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 18                                               
+    NAME                   = LABEL_REVISION_NOTE                              
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 312                                              
+    BYTES                  = 47                                               
+    FORMAT                 = "A47"                                            
+    DESCRIPTION            = "Date of last revision made to the label"        
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 19                                               
+    NAME                   = DATA_SET_ID                                      
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 362                                              
+    BYTES                  = 30                                               
+    FORMAT                 = "A30"                                            
+    DESCRIPTION            = "Data set ID"                                    
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 20                                               
+    NAME                   = RECORD_TYPE                                      
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 395                                              
+    BYTES                  = 13                                               
+    FORMAT                 = "A13"                                            
+    DESCRIPTION            = "The record format of the file"                  
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 21                                               
+    NAME                   = MISSION_ID                                       
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 411                                              
+    BYTES                  = 5                                                
+    FORMAT                 = "A5"                                             
+    DESCRIPTION            = "Synonym or mnemonic for the MISSION_NAME        
+                              element"                                        
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 22                                               
+    NAME                   = MISSION_NAME                                     
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 419                                              
+    BYTES                  = 17                                               
+    FORMAT                 = "A17"                                            
+    DESCRIPTION            = "Identifies the major planetary mission or       
+                              project"                                        
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 23                                               
+    NAME                   = INSTRUMENT_HOST_ID                               
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 439                                              
+    BYTES                  = 11                                               
+    FORMAT                 = "A11"                                            
+    DESCRIPTION            = "A unique identifier for the host                
+                              where the instrument is located."               
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 24                                               
+    NAME                   = INSTRUMENT_HOST_NAME                             
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 453                                              
+    BYTES                  = 25                                               
+    FORMAT                 = "A25"                                            
+    DESCRIPTION            = "The full name of the host on which              
+                              the instrument is based"                        
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 25                                               
+    NAME                   = INSTRUMENT_NAME                                  
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 481                                              
+    BYTES                  = 26                                               
+    FORMAT                 = "A26"                                            
+    DESCRIPTION            = "The full name of the instrument"                
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 26                                               
+    NAME                   = INSTRUMENT_ID                                    
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 510                                              
+    BYTES                  = 6                                                
+    FORMAT                 = "A6"                                             
+    DESCRIPTION            = "The abbreviated name or acronym which           
+                              identifies the instrument"                      
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 27                                               
+    NAME                   = TARGET_NAME                                      
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 519                                              
+    BYTES                  = 6                                                
+    FORMAT                 = "A6"                                             
+    DESCRIPTION            = "Identifies the target"                          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 28                                               
+    NAME                   = TARGET_TYPE                                      
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 528                                              
+    BYTES                  = 11                                               
+    FORMAT                 = "A11"                                            
+    DESCRIPTION            = "The type of a named target"                     
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 29                                               
+    NAME                   = MISSION_PHASE_NAME                               
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 542                                              
+    BYTES                  = 17                                               
+    FORMAT                 = "A17"                                            
+    DESCRIPTION            = "The commonly-used identifier of a mission       
+                              phase"                                          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 30                                               
+    NAME                   = PRODUCT_VERSION_TYPE                             
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 562                                              
+    BYTES                  = 19                                               
+    FORMAT                 = "A19"                                            
+    DESCRIPTION            = "The version of an individual data product."     
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 31                                               
+    NAME                   = PRODUCER_INSTITUTION_NAME                        
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 584                                              
+    BYTES                  = 29                                               
+    FORMAT                 = "A29"                                            
+    DESCRIPTION            = "Identifies the university, research center,     
+                              NASA center or other institution associated     
+                              with the production of the data set"            
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 32                                               
+    NAME                   = SOFTWARE_NAME                                    
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 616                                              
+    BYTES                  = 25                                               
+    FORMAT                 = "A25"                                            
+    DESCRIPTION            = "Identifies the name of the data processing      
+                              software that was used to produce the L0        
+                              data products"                                  
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 33                                               
+    NAME                   = SOFTWARE_VERSION_ID                              
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 644                                              
+    BYTES                  = 4                                                
+    FORMAT                 = "A4"                                             
+    DESCRIPTION            = "The version (development level) of the data     
+                              processing software that was used to produce    
+                              the L0 data products"                           
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 34                                               
+    NAME                   = L0_DESCRIPTION                                   
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 651                                              
+    BYTES                  = 129                                              
+    FORMAT                 = "A129"                                           
+    DESCRIPTION            = "Brief description of L0 data products"          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 35                                               
+    NAME                   = DETECTOR_TEMPERATURE                             
+    DATA_TYPE              = ASCII_REAL                                       
+    START_BYTE             = 782                                              
+    BYTES                  = 8                                                
+    FORMAT                 = "F3.2"                                           
+    DESCRIPTION            = "Temperature of the detector in Kelvin"          
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 36                                               
+    NAME                   = SAMPLE_TYPE                                      
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 792                                              
+    BYTES                  = 15                                               
+    FORMAT                 = "A15"                                            
+    DESCRIPTION            = "Describes the data storage representation of    
+                              the Level 0 image cube (L0.IMG)"                
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 37                                               
+    NAME                   = SAMPLE_BITS                                      
+    DATA_TYPE              = ASCII_INTEGER                                    
+    START_BYTE             = 809                                              
+    BYTES                  = 6                                                
+    DESCRIPTION            = "Describes the stored number of bits, or units   
+                              of binary information, contained in the L0      
+                              image cube (L0.IMG)"                            
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 38                                               
+    NAME                   = UNIT                                             
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 817                                              
+    BYTES                  = 4                                                
+    FORMAT                 = "A4"                                             
+    DESCRIPTION            = "Unit of measurement for each channel,           
+                              sample, and line of the L0                      
+                              image cube (L0.IMG)"                            
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 39                                               
+    NAME                   = BAND_STORAGE_TYPE                                
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 824                                              
+    BYTES                  = 18                                               
+    FORMAT                 = "A18"                                            
+    DESCRIPTION            = "The storage sequence of lines, samples and      
+                              bands of the L0 image cube (RDN.IMG)"           
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 40                                               
+    NAME                   = LINE_DISPLAY_DIRECTION                           
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 845                                              
+    BYTES                  = 6                                                
+    FORMAT                 = "A6"                                             
+    DESCRIPTION            = "The orientation of lines within the L0 image    
+                              cube (L0.IMG) for viewing on a display device"  
+  END_OBJECT               = COLUMN                                           
+                                                                              
+ OBJECT                    = COLUMN                                           
+    COLUMN_NUMBER          = 41                                               
+    NAME                   = SAMPLE_DISPLAY_DIRECTION                         
+    DATA_TYPE              = CHARACTER                                        
+    START_BYTE             = 854                                              
+    BYTES                  = 7                                                
+    FORMAT                 = "A7"                                             
+    DESCRIPTION            = "The orientation of samples within a line of     
+                              the L0 image cube (L0.IMG) for viewing on a     
+                              display device"                                 
+  END_OBJECT               = COLUMN                                           
+                                                                              
+  END_OBJECT                 = INDEX_TABLE                                    
+END                                                                           
