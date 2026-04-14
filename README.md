@@ -15,7 +15,7 @@
 | Module| Description |
 |-------------|--------------|
 |ℹ️`io`| Provides easy-to-use and flexible input/output functions for **reading and writing** M<sup>3</sup> raster data |
-|📬`PDSretrieval`    | Allows the user to **download files** directly from NASA's planetary data system (PDS) into a user-friendly format in the form of a file manager class. |
+|📬`file_downloader`    | Allows the user to **download files** from NASA's planetary data system (PDS) into a user-friendly format in the form of a file manager class. |
 |⚙️`level2pipeline`   | Contains the main logic and computional functions for processing level 1v3 (**Radiance**) M<sup>3</sup> data **into** level 2 (**Reflectance**) data|
 |🌗 `selenography`     | Wraps `gdal` and `rasterio` to provide **geospatial utilities tailored for use on the Moon**, including built-in lunar coordinate systems |
 
@@ -49,7 +49,7 @@ for i in m3_data_ids:
     if Path(root_dir, i).exists():
         _ = m3.M3FileManager(root_dir, i)  # Downloads Data
     else:
-        m3.PDSRetrieval.create_urls_file(root_dir, i)  # Creates url files
+        m3.file_downloader.create_urls_file(root_dir, i)  # Creates url files
 ```
 
 ### Building a Processing Pipeline

@@ -20,7 +20,8 @@ from . import io
 from . import level2pipeline
 from . import selenography
 from . import metadata_models
-from .PDSretrieval import M3FileManager, get_m3_id
+from .file_manager.file_manager import M3FileManager
+from .file_downloader import create_urls_file
 from .level2pipeline.main_pipeline import M3Level2Pipeline
 
 __all__ = [
@@ -31,5 +32,5 @@ __all__ = [
     "metadata_models",
     "M3FileManager",
     "M3Level2Pipeline",
-    "get_m3_id",
+    "create_urls_file",
 ]
