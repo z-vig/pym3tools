@@ -99,6 +99,8 @@ class Georeference(Step):
         self,
         gcps_fp: Path | str | None = None,
         bounding_box: BoundingBoxModel | None = None,
+        custom_slope: Path | str | None = None,
+        custom_aspect: Path | str | None = None,
         name: str = "georeferenced",
         prj4_str: str = MOON_GCS_PRJ,
         enabled: bool = True,
@@ -113,6 +115,9 @@ class Georeference(Step):
 
         self._bbox = bounding_box
         self.attrs: attrs.GeoreferencedAttrs
+
+        self.slp = custom_slope
+        self.asp = custom_aspect
 
     def run(self, state: PipelineState) -> PipelineState:
         # ==== Retrieving latitude/longitude ====
@@ -129,7 +134,14 @@ class Georeference(Step):
         gtrans = georeference.get_new_geotransform(area)
 
         state = georeference.modify_state(
-            state, latlong_result, gtrans, swath, area, self.prj
+            state,
+            latlong_result,
+            gtrans,
+            swath,
+            area,
+            self.prj,
+            self.slp,
+            self.asp,
         )
         return state
 

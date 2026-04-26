@@ -206,13 +206,7 @@ def replace_terrain(
     slope_args = (new_slp.array.values[:, :, 0] * conversion, new_slp.bounds)
     aspect_args = (new_asp.array.values[:, :, 0] * conversion, new_asp.bounds)
 
-    if m3geom.georeferenced:
-        print("resampling gridded data...")
-        m3geom.slope = georef_geom.resample_gridded_data(*slope_args)
-        m3geom.aspct = georef_geom.resample_gridded_data(*aspect_args)
-    else:
-        print("gridded data to swath...")
-        m3geom.slope = georef_geom.gridded_data_to_swath(*slope_args)
-        m3geom.aspct = georef_geom.gridded_data_to_swath(*aspect_args)
+    m3geom.slope = georef_geom.resample_gridded_data(*slope_args)
+    m3geom.aspct = georef_geom.resample_gridded_data(*aspect_args)
 
     return m3geom

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import ClassVar, Self
+from pathlib import Path
 
 from pym3tools.rdn2rfl.pipeline_state import (
     PipelineState,
@@ -11,6 +12,7 @@ from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 from pym3tools.data_retrieval.data_directory import M3DataPaths
 from pym3tools.rdn2rfl.retrieve_terrain_data import (
     resample_m3geom,
+    replace_terrain,
     # crop_m3geom,
 )
 
@@ -198,7 +200,7 @@ def get_new_loc(area: AreaDefinition) -> np.ndarray:
 
 
 def get_new_geotransform(area: AreaDefinition) -> GeotransformModel:
-    return GeotransformModel(
+    gtrans = GeotransformModel(
         upperleft=PointModel(
             x=area.pixel_upper_left[0], y=area.pixel_upper_left[1]
         ),
@@ -207,6 +209,7 @@ def get_new_geotransform(area: AreaDefinition) -> GeotransformModel:
         yres=area.resolution[1],
         col_rotation=0,
     )
+    return gtrans
 
 
 def modify_state(
@@ -216,6 +219,8 @@ def modify_state(
     swath: SwathDefinition,
     area: AreaDefinition,
     prj: str,
+    custom_slope: Path | str | None = None,
+    custom_aspect: Path | str | None = None,
 ) -> PipelineState:
     # ==== Updating pipeline state ====
     state.crs = prj
@@ -223,11 +228,15 @@ def modify_state(
     state.geom.swath = swath
     state.geom.area = area
     state.geom.set_swath_window(latlong.row_slice, latlong.col_slice)
+
     state.data = state.geom.swath_to_gridded_data(np.array(state.data))
-    # cropped_m3geom = crop_m3geom(
-    #     state.obs, latlong.row_slice, latlong.col_slice
-    # )
     state.obs = resample_m3geom(state.obs, state.geom)
+
+    if (custom_aspect is not None) and (custom_slope is not None):
+        state.obs = replace_terrain(
+            state.obs, state.geom, custom_slope, custom_aspect
+        )
+
     state.flags |= CompletedFlag.GEOREFERENCED
 
     return state

@@ -1,4 +1,5 @@
-from typing import Literal, TypeAlias, TypeGuard
+from typing import Literal, TypeAlias, TypeGuard, Any
+from cubio import CubeContext, CubeData
 
 DataLevel: TypeAlias = Literal["L0", "L1B", "L2"]
 
@@ -60,3 +61,17 @@ ThermalCorrectionMethod: TypeAlias = Literal[
 
 
 TopoCorrectionMethod: TypeAlias = Literal["Lommel-Seeliger", "Lunar Lambert"]
+
+CubioTuple: TypeAlias = tuple[CubeContext, CubeData]
+
+
+def is_cubio_tuple(val: Any) -> TypeGuard[CubioTuple]:
+    return (
+        isinstance(val, tuple)
+        and isinstance(val[0], CubeData)
+        and isinstance(val[1], CubeContext)
+        and len(val) == 2
+    )
+
+
+MosaicMethod: TypeAlias = Literal["Mean", "MinimumIncidenceAngle", "MaxAlbedo"]

@@ -11,19 +11,28 @@ def _get_metadata(
     product_ids: list[str],
     target_product_id: DataIDString | list[DataIDString],
     target_column_entries: list[str],
+    include_l0_ids: bool = False,
 ) -> str | list[str] | None:
     if isinstance(target_product_id, list):
         result_list = []
         for targ_id in target_product_id:
             for i, j in zip(product_ids, target_column_entries):
                 m3id = M3DataID.from_string(i)
-                if targ_id == m3id.as_string:
+                if include_l0_ids:
+                    m3id_string = m3id.as_raw_string()
+                else:
+                    m3id_string = m3id.string
+                if targ_id == m3id_string:
                     result_list.append(str(j))
         return result_list
     else:
         for i, j in zip(product_ids, target_column_entries):
             m3id = M3DataID.from_string(i)
-            if target_product_id == m3id.as_string:
+            if include_l0_ids:
+                m3id_string = m3id.as_raw_string()
+            else:
+                m3id_string = m3id.string
+            if target_product_id == m3id_string:
                 return j
         return None
 
@@ -51,7 +60,9 @@ def get_l0_metadata(
     target_col2 = ColumnMetadata.from_l0_op2(column_name)
     target_col_entries = [*target_col1.entries, *target_col2.entries]
 
-    result = _get_metadata(id_col_entries, data_id, target_col_entries)
+    result = _get_metadata(
+        id_col_entries, data_id, target_col_entries, include_l0_ids=True
+    )
     if result is not None:
         return result
     raise ValueError("Invalid Data ID")

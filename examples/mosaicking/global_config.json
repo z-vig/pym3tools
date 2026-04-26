@@ -1,0 +1,14 @@
+{
+  "rfl_fp_list": [
+    "D:/moon_data/m3/Gruithuisen_Region/M3G20090208T160125/products/M3G20090208T160125_rfl.json",
+    "D:/moon_data/m3/Gruithuisen_Region/M3G20090208T175211/products/M3G20090208T175211_rfl.json",
+    "D:/moon_data/m3/Gruithuisen_Region/M3G20090208T194335/products/M3G20090208T194335_rfl.json"
+  ],
+  "method": "Mean",
+  "inc_fp_list": [
+    "D:/moon_data/m3/Gruithuisen_Region/M3G20090208T160125/products/M3G20090208T160125_photo.json",
+    "D:/moon_data/m3/Gruithuisen_Region/M3G20090208T175211/products/M3G20090208T175211_photo.json",
+    "D:/moon_data/m3/Gruithuisen_Region/M3G20090208T194335/products/M3G20090208T194335_photo.json"
+  ],
+  "photometry_cube": true
+}

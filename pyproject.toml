@@ -23,7 +23,8 @@ dependencies = [
     "scipy >=1.16.1,<2.0.0",
     "scipy-stubs >=1.16.1.1,<2.0.0.0",
     "types-pyyaml >=6.0.12.20250822,<7.0.0.0",
-    "cubio (>=0.1.2,<0.2.0)"
+    "cubio @ file:///C:/Users/zvig/python_code/package_production/cubio",
+    "h5py-stubs (>=0.1.2,<0.2.0)"
 ]
 
 include = [
@@ -43,3 +44,6 @@ include = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+cubio = {develop = true}

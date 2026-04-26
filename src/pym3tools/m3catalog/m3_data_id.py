@@ -86,8 +86,20 @@ class M3DataID:
             f"{self.acquisition_datetime.second:02}"
         )
         if not is_valid_data_id(id_string):
-            raise ValueError("Invalid Data ID")
+            raise ValueError(f"Invalid Data ID: {id_string}")
         return id_string
+
+    def as_raw_string(self) -> str:
+        """Returns unchecked Data ID string."""
+        return (
+            f"M3{acq_mode_to_char[self.acquistion_mode]}"
+            f"{self.acquisition_datetime.year:02}"
+            f"{self.acquisition_datetime.month:02}"
+            f"{self.acquisition_datetime.day:02}T"
+            f"{self.acquisition_datetime.hour:02}"
+            f"{self.acquisition_datetime.minute:02}"
+            f"{self.acquisition_datetime.second:02}"
+        )
 
     @property
     def op(self) -> OpticalPeriod:

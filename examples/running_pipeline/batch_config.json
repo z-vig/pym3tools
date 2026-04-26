@@ -1,0 +1,45 @@
+{
+  "batch_name": "Gruithuisen_Region",
+  "config_list": [
+    {
+      "name": "M3T20090418T020644",
+      "gcps": "D:\\moon_data\\m3\\Gruithuisen_Region\\gcps_files\\M3T20090418T020644.gcps",
+      "slope": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Slope.json",
+      "aspect": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Aspect.json",
+      "catalog": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3T20090418T020644",
+      "cache": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3T20090418T020644\\pipeline_cache.hdf5"
+    },
+    {
+      "name": "M3T20090418T020848",
+      "gcps": "D:\\moon_data\\m3\\Gruithuisen_Region\\gcps_files\\M3T20090418T020848.gcps",
+      "slope": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Slope.json",
+      "aspect": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Aspect.json",
+      "catalog": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3T20090418T020848",
+      "cache": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3T20090418T020848\\pipeline_cache.hdf5"
+    },
+    {
+      "name": "M3G20090208T160125",
+      "gcps": "D:\\moon_data\\m3\\Gruithuisen_Region\\gcps_files\\M3G20090208T160125.gcps",
+      "slope": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Slope.json",
+      "aspect": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Aspect.json",
+      "catalog": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3G20090208T160125",
+      "cache": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3G20090208T160125\\pipeline_cache.hdf5"
+    },
+    {
+      "name": "M3G20090208T175211",
+      "gcps": "D:\\moon_data\\m3\\Gruithuisen_Region\\gcps_files\\M3G20090208T175211.gcps",
+      "slope": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Slope.json",
+      "aspect": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Aspect.json",
+      "catalog": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3G20090208T175211",
+      "cache": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3G20090208T175211\\pipeline_cache.hdf5"
+    },
+    {
+      "name": "M3G20090208T194335",
+      "gcps": "D:\\moon_data\\m3\\Gruithuisen_Region\\gcps_files\\M3G20090208T194335.gcps",
+      "slope": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Slope.json",
+      "aspect": "D:\\moon_data\\derived_products\\gruithuisen_region\\Gruit_Aspect.json",
+      "catalog": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3G20090208T194335",
+      "cache": "D:\\moon_data\\m3\\Gruithuisen_Region\\M3G20090208T194335\\pipeline_cache.hdf5"
+    }
+  ]
+}
