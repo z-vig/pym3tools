@@ -232,9 +232,9 @@ OBJECT     = INDEX_TABLE
     COLUMN_NUMBER = 19                                                        
     NAME          = "CH1:GLOBAL_BANDPASS_FILE_NAME"                           
     DATA_TYPE     = "CHARACTER"                                               
-    START_BYTE    = 378                                                       
-    BYTES         = 25                                                        
-    FORMAT        = "A25"                                                     
+    START_BYTE    = 374                                                       
+    BYTES         = 24                                                        
+    FORMAT        = "A24"                                                     
     DESCRIPTION   = "Name of the M3 Level 1B global band passes image         
       made by averaging target best-fit gaussians, then renormalizing to      
       unit sum 85 global bands.  This file is archived in the calibration     

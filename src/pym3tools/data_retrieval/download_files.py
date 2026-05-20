@@ -8,6 +8,7 @@ from .config_download_paths import (
     config_l1,
     config_l2,
     config_calibration,
+    config_ssc_adj,
 )
 from .retrieve_urls import retrieve_urls
 from .add_json_files import add_json_to_level
@@ -34,9 +35,10 @@ def gather_files(
     l1_files = config_l1(data_id, m3data)
     l2_files = config_l2(data_id, m3data)
     cal_files = config_calibration(data_id, m3data)
+    ssc_files = config_ssc_adj(data_id, m3data)
 
     download_dict = gather_downloads(
-        [*l0_files, *l1_files, *l2_files, *cal_files]
+        [*l0_files, *l1_files, *l2_files, *cal_files, *ssc_files]
     )
 
     return m3data, download_dict

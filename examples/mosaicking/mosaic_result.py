@@ -14,8 +14,8 @@ def mosaic_from_config(config_fp: str | Path):
     inc_mosaic = mosaic_arrays(config.inc_fp_list, "Mean")
 
     mosaic_dict: dict[str, tuple[ResampledMosaic, str]] = {
-        "M3G_GRUIT_RFL": (rfl_mosaic, config.rfl_fp_list[0]),
-        "M3G_GRUIT_INC": (inc_mosaic, config.inc_fp_list[0]),
+        "M3T_GRUIT_RFL": (rfl_mosaic, config.rfl_fp_list[0]),
+        "M3T_GRUIT_INC": (inc_mosaic, config.inc_fp_list[0]),
     }
 
     for name, (mosaic, sample) in mosaic_dict.items():
@@ -33,9 +33,9 @@ def mosaic_from_config(config_fp: str | Path):
             mosaic_cc,
             mosaic_cd,
             "BIL",
-            "D:/moon_data/m3/Gruithuisen_Region/M3G_GDOMES_MOSAIC/_",
+            "D:/moon_data/m3/Gruithuisen_Region/M3T_GDOMES_MOSAIC/_",
         )
 
 
 if __name__ == "__main__":
-    mosaic_from_config(Path(__file__).parent / "global_config.json")
+    mosaic_from_config(Path(__file__).parent / "targeted_config.json")

@@ -22,6 +22,10 @@ def retrieve_urls(url_dict: Mapping[str, Path]):
     for url, save in url_dict.items():
         if save.exists():
             continue
+        if url == "":
+            with open(save, "w") as f:
+                f.write("")
+            continue
         download_with_resume_and_retries(url, save)
 
 

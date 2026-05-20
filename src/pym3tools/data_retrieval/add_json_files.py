@@ -1,12 +1,14 @@
-from cubio import cubedata_from_envi_file
+from cubio import cube_from_envi
+from cubio.cube_context.envi_hdr_writer import EnviHeaderWriter
 from pathlib import Path
 from .data_directory import M3DataPaths
 from pym3tools.types import DataLevel
 
 
 def _write_json(fp: Path, name: str):
-    raw_ctxt, raw_cube = cubedata_from_envi_file(fp, name)
-    raw_ctxt.write_envi_hdr(fp)
+    raw_ctxt, raw_cube = cube_from_envi(fp, name)
+    envi_hdr_writer = EnviHeaderWriter(raw_ctxt)
+    envi_hdr_writer.to_file(fp)
 
 
 # Configuration mapping: (attribute_name, data_name) pairs

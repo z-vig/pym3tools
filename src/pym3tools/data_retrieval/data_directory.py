@@ -210,6 +210,20 @@ class M3DataPaths:
             tab=self._cal_dir / "RFL_F_ALPHA.tab",
         )
 
+    @property
+    def ssc_adj(self) -> PDSTabDataPath:
+        return PDSTabDataPath(
+            lbl=self._cal_dir / "SSC_ADJ.lbl",
+            tab=self._cal_dir / "SSC_ADJ.tab",
+        )
+
+    @property
+    def global_bandpass(self) -> PDSTabDataPath:
+        return PDSTabDataPath(
+            lbl=self._cal_dir / "GLOBAL_BANDPASS.lbl",
+            tab=self._cal_dir / "GLOBAL_BANDPASS.tab",
+        )
+
     def check_status(self, verbose: bool = False) -> bool:
         dirs = (
             self._data_dir.exists()
@@ -234,6 +248,8 @@ class M3DataPaths:
             and self.ground_truth.exists()
             and self.statistical_polish.exists()
             and self.photometry_correction.exists()
+            and self.ssc_adj.exists()
+            and self.global_bandpass.exists()
         )
 
         if verbose:

@@ -18,11 +18,10 @@ from .download_models import (
 from .data_directory import M3DataPaths
 from .get_ground_truth_file import get_ground_truth_file
 
-
 JPL = URLPath("https://planetarydata.jpl.nasa.gov/img/data/m3/")
 
 
-def config_l0(data_id: DataIDString, save: M3DataPaths):
+def config_l0(data_id: DataIDString, save: M3DataPaths) -> list[Downloadable]:
     get_l0 = partial(get_l0_metadata, data_id)
     l0_path = (
         JPL
@@ -87,7 +86,13 @@ def config_calibration(
     data_id: DataIDString, save: M3DataPaths
 ) -> list[Downloadable]:
     get_l2 = partial(get_l2_metadata, data_id)
+    get_l1 = partial(get_l1_metadata, data_id)
     cal_path = JPL / get_l2("VOLUME_ID") / "CALIB"
+    l1_cal_path = JPL / get_l1("VOLUME_ID") / "CALIB"
+    global_bpf_filename = l1_cal_path / get_l2("CH1:GLOBAL_BANDPASS_FILE_NAME")
+    # print(get_l1("CH1:GLOBAL_BANDPASS_FILE_NAME"))
+    # print(get_l2("CH1:GLOBAL_BANDPASS_FILE_NAME"))
+
     # ==== Calibration Downloads ====
     solspec = TabDownload.from_base(
         cal_path / get_l2("CH1:SOLAR_SPECTRUM_FILE_NAME"),
@@ -104,4 +109,21 @@ def config_calibration(
         save.photometry_correction.base,
     )
 
-    return [solspec, statpol, grndtru, falpha]
+    global_bandpass = ImageDownload.from_base(
+        global_bpf_filename,
+        save.global_bandpass.base,
+    )
+
+    return [solspec, statpol, grndtru, falpha, global_bandpass]
+
+
+def config_ssc_adj(data_id: DataIDString, save: M3DataPaths):
+    get_l1 = partial(get_l1_metadata, data_id)
+    ssc = TabDownload.from_base_nolbl(
+        JPL.joinpath(
+            get_l1("VOLUME_ID"), "EXTRAS", "SSCADJ", f"{data_id}_SSCADJ.TAB"
+        ),
+        save.ssc_adj.base,
+    )
+
+    return [ssc]

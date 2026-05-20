@@ -87,6 +87,19 @@ class TabDownload:
             ),
         )
 
+    @classmethod
+    def from_base_nolbl(cls, src_base: URLPath, trg_base: Path) -> Self:
+        return cls(
+            tab=DownloadPath(
+                str(src_base.with_suffix(cls.tab_ext.upper())),
+                trg_base.with_suffix(cls.tab_ext.lower()),
+            ),
+            lbl=DownloadPath(
+                "",
+                trg_base.with_suffix(cls.lbl_ext.lower()),
+            ),
+        )
+
     def to_save(self) -> dict[str, Path]:
         return {
             self.tab.source: self.tab.target,

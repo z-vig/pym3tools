@@ -2,11 +2,10 @@
 
 from pym3tools.data_retrieval.data_directory import M3DataPaths
 import spectralio as sio
-from cubio import cubedata_from_json_file, cubedata_from_geotiff, write_envi
-from cubio.envi_hdr_tools import extract_hdr_bbl
+from cubio import cube_from_envi, cube_from_json, cube_from_gtif, write_envi
+from cubio.cube_context.envi_hdr_tools import extract_hdr_bbl
 import numpy as np
 import xarray as xr
-
 
 F32 = np.finfo(np.float32)
 
@@ -14,7 +13,7 @@ F32 = np.finfo(np.float32)
 def tif_to_envi():
     cat = M3DataPaths("D:/moon_data/m3/Gruithuisen_Region/M3T20090418T020644/")
     mosaic_fp = "D:/moon_data/m3/Gruithuisen_Region/M3T_GRUIT_MOSAIC/M3T_GRUIT_PHOTOMETRY.tif"
-    sample, _ = cubedata_from_json_file(
+    sample, _ = cube_from_json(
         "D:/moon_data/m3/Gruithuisen_Region/mosaic_components_photometry/M3T20090418T020644_PHOTOMETRY.json"
     )
     print(sample.band_names)
@@ -22,7 +21,7 @@ def tif_to_envi():
     if bbl == "No BBL Found":
         raise ValueError()
 
-    ctxt, cub = cubedata_from_geotiff(
+    ctxt, cub = cube_from_gtif(
         mosaic_fp,
         "M3T_GRUIT_PHOTOMETRY",
         "Reflectance Mosaic for Targeted Mode",
@@ -43,7 +42,7 @@ def tif_to_envi():
 
 
 def envi_to_geospcub():
-    ctxt, cub = cubedata_from_json_file(
+    ctxt, cub = cube_from_json(
         "D:/moon_data/m3/Gruithuisen_Region/M3T_GRUIT_MOSAIC/M3T_GRUIT_PHOTOMETRY.json"
     )
     geodat = sio.BaseGeolocationModel(
