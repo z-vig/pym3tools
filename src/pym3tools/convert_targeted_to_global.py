@@ -41,7 +41,7 @@ def filter_cube_slice(
     z_slice: slice,
     filter_width: int,
     add_offset: bool = True,
-):
+) -> np.ndarray:
     """
     Filters one slice of a cube at a specific filter width.
 
