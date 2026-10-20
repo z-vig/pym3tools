@@ -4,6 +4,7 @@
   >*A modern standardized toolkit for processing Moon Mineralogy Mapper (M<sup>3</sup>) Data in a pure Python 3.13 environment.*
 
 ---
+[![Unit Tests](https://github.com/z-vig/pym3tools/actions/workflows/unit_testing.yml/badge.svg)](https://github.com/z-vig/pym3tools/actions/workflows/unit_testing.yml)
 
 ## What is `pym3tools`?
 
