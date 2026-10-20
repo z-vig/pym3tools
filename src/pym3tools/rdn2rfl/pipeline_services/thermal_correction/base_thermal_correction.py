@@ -1,5 +1,6 @@
-import numpy as np
 from abc import ABC, abstractmethod
+
+import numpy as np
 
 from pym3tools.data_retrieval.data_directory import M3DataPaths
 from pym3tools.rdn2rfl.pipeline_state import PipelineState

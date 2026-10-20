@@ -14,17 +14,18 @@ Moon. Journal of Geophysical Research, 116.
 https://doi.org/10.1029/2010je003751
 """
 
-from dataclasses import dataclass, field, MISSING
+from dataclasses import MISSING, dataclass, field
 
 import numpy as np
 
-from pym3tools.constants import h, k_b, c
+from pym3tools.constants import c, h, k_b
 from pym3tools.data_retrieval.data_directory import M3DataPaths
 from pym3tools.rdn2rfl.pipeline_services.solar_removal import (
     retrieve_solar_data,
 )
 from pym3tools.rdn2rfl.pipeline_state import PipelineState
 from pym3tools.save_models.pipeline_cache_schema import PipelineCache
+
 from .base_thermal_correction import BaseCorrection
 
 
@@ -188,7 +189,6 @@ def initial_thermal_estimate(
 
 def iterative_step():
     """One step in the iterative thermal correction."""
-    pass
 
 
 class Clark(BaseCorrection):

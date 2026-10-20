@@ -1,18 +1,18 @@
-from cubio.geotools.models import BoundingBoxModel
-from cubio import cubedata_from_json_file
 import numpy as np
 import xarray as xr
+from cubio import cube_from_json
+from cubio.geotools.models import BoundingBoxModel
 from pyresample.geometry import AreaDefinition
 
-from pym3tools.save_models.pipeline_cache_schema import PipelineCache
-from pym3tools.rdn2rfl.step_model import PipelineState
+from pym3tools.array_utils import boolean_to_slice
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.rdn2rfl.data_transfer_classes import CropResult
 from pym3tools.rdn2rfl.pipeline_state import (
     CompletedFlag,
     get_standard_dset_attrs,
 )
-from pym3tools.data_retrieval.data_directory import M3DataPaths
-from pym3tools.rdn2rfl.data_transfer_classes import CropResult
-from pym3tools.array_utils import boolean_to_slice
+from pym3tools.rdn2rfl.step_model import PipelineState
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 
 
 def crop_data_from_loc_backplane(
@@ -54,7 +54,7 @@ def load_loc_backplane(catalog: M3DataPaths) -> tuple[np.ndarray, np.ndarray]:
     longitudes, latitudes: tuple[np.ndarray]
         Longitude and Latitude backplanes.
     """
-    _, loc = cubedata_from_json_file(catalog.loc.json)
+    _, loc = cube_from_json(catalog.loc.json)
     loc.transpose_to("BIP")
 
     longitudes = np.array(loc.array.values[:, :, 0])

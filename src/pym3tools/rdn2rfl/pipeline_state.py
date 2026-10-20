@@ -1,18 +1,18 @@
-from enum import IntFlag, auto
 from dataclasses import dataclass, field
+from enum import IntFlag, auto
 
 import numpy as np
 import xarray as xr
 from cubio.geotools.models import GeotransformModel
 
-from .data_transfer_classes import GeoreferencingGeometry
-
-from pym3tools.save_models.attribute_models import (
-    StandardDatasetAttrs,
-    OneDimensionDatasetAttrs,
-)
 from pym3tools.constants import MOON_GCS_PRJ
 from pym3tools.rdn2rfl.retrieve_terrain_data import M3Geometry
+from pym3tools.save_models.attribute_models import (
+    OneDimensionDatasetAttrs,
+    StandardDatasetAttrs,
+)
+
+from .data_transfer_classes import GeoreferencingGeometry
 
 
 class StepCompletionState(IntFlag):
@@ -23,6 +23,7 @@ class StepCompletionState(IntFlag):
 
 class CompletedFlag(IntFlag):
     NONE = 0
+    DESTRIPED = auto()
     CROPPED = auto()
     GEOREFERENCED = auto()
     SOLAR_REMOVED = auto()

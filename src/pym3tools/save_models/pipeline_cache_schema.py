@@ -1,20 +1,23 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Mapping
+from typing import TypeVar
+
 import h5py
 import numpy as np
 
-from pym3tools.types import DatasetStatus
 from pym3tools.save_models import attribute_models as attr_models
+from pym3tools.types import DatasetStatus
+
 from .hdf5_models import (
+    GroupSpec,
     _get_and_validate_h5_dataset,
     _get_and_validate_h5group,
 )
-from .hdf5_models import GroupSpec
-
 
 PIPELINE_SCHEMA = GroupSpec(
     name="pipeline_data",
     groups={
+        "destriped": GroupSpec(name="destriped"),
         "cropped": GroupSpec(name="cropped"),
         "georeferenced": GroupSpec(name="georeferenced"),
         "solar_removed": GroupSpec(name="solar_removed"),
@@ -29,7 +32,7 @@ A = TypeVar("A", bound=Mapping[str, object])
 
 
 @dataclass
-class Dataset(Generic[A]):
+class Dataset[A]:
     """
     HDF5 Dataset representation for `pym3tools` pipeline cache.
     """
@@ -57,7 +60,7 @@ class Dataset(Generic[A]):
     def attrs(self) -> A:
         return self._dset.attrs  # type: ignore
 
-    def set_attrs(self, attrs: A):
+    def set_attrs(self, attrs: Mapping[str, object]):
         if self._status == "NotSet":
             raise ValueError("Write data before setting attributes.")
         for k, v in attrs.items():
@@ -65,7 +68,7 @@ class Dataset(Generic[A]):
 
 
 @dataclass
-class BaseGroup(Generic[A]):
+class BaseGroup[A]:
     _group: h5py.Group
 
     @property
@@ -77,9 +80,13 @@ class BaseGroup(Generic[A]):
     def attrs(self) -> A:
         return self._group.attrs  # type: ignore
 
-    def set_attrs(self, attrs: A) -> None:
+    def set_attrs(self, attrs: Mapping[str, object]) -> None:
         for k, v in attrs.items():
             self._group.attrs[k] = v
+
+
+@dataclass
+class DestripedGroup(BaseGroup[attr_models.DestripedAttrs]): ...
 
 
 @dataclass
@@ -165,8 +172,13 @@ class PipelineCache:
     def __post_init__(self) -> None:
         _base = self._file["pipeline_data"]
         if not isinstance(_base, h5py.Group):
-            raise ValueError("Invalid Base Group")
+            raise TypeError("Invalid Base Group")
         self._base: h5py.Group = _base
+
+    @property
+    def destriped(self) -> DestripedGroup:
+        grp = _get_and_validate_h5group(self._base, "destriped")
+        return DestripedGroup(grp)
 
     @property
     def cropped(self) -> CroppedGroup:

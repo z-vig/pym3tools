@@ -1,7 +1,8 @@
 # %%
-from cubio import cube_from_json
 import matplotlib.pyplot as plt
 import numpy as np
+from cubio import cube_from_json
+
 from pym3tools.convert_targeted_to_global import targeted_to_global_spectral
 
 TRG_RFL = (

@@ -2,9 +2,8 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from pym3tools.rdn2rfl import M3Level2Pipeline, Step
 from pym3tools.rdn2rfl import pipeline_steps as r2r
-from pym3tools.rdn2rfl import M3Level2Pipeline
-from pym3tools.rdn2rfl import Step
 
 
 class RegionalPipelineConfig(BaseModel):
@@ -25,8 +24,11 @@ with open(Path(__file__).parent / "batch_config.json") as f:
     batch = RegionalPipelineBatch.model_validate_json(f.read())
 
 for config in batch.config_list:
+    if config.name.find("M3G") > -1:
+        continue
     print(f"Running Pipeline for ID: {config.name}")
     steps: list[Step] = [
+        r2r.Destripe(method="GaussianFilter"),
         r2r.Georeference(
             gcps_fp=config.gcps,
             custom_slope=config.slope,

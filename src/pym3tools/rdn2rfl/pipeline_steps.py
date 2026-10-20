@@ -1,24 +1,66 @@
 from pathlib import Path
 from typing import Literal
 
-from cubio.geotools.models import BoundingBoxModel, GCPGroup
 import numpy as np
+from cubio.geotools.models import BoundingBoxModel, GCPGroup
 
 from pym3tools.constants import MOON_GCS_PRJ
-from pym3tools.save_models import attribute_models as attrs
 from pym3tools.data_retrieval.get_ground_truth_file import determine_warm_cold
-from pym3tools.types import ThermalCorrectionMethod, TopoCorrectionMethod
+from pym3tools.save_models import attribute_models as attrs
+from pym3tools.types import (
+    DestripingMethod,
+    ThermalCorrectionMethod,
+    TopoCorrectionMethod,
+)
 
 from .pipeline_services import (
     crop,
+    destripe,
     georeference,
+    photometric_correction,
     solar_removal,
     statistical_polish,
     thermal_correction,
-    photometric_correction,
 )
-from .step_model import Step
 from .pipeline_state import PipelineState
+from .step_model import Step
+
+
+class Destripe(Step):
+    """
+    Destriping Step
+    ---------------
+    Applies a destriping correction to the data before it is georeferenced.
+
+    Parameters
+    ----------
+    method: DestripingMethod
+        One of:
+            - "UniformColumnCorrection"
+
+    Destriping Method Descriptions
+    ------------------------------
+    1. **Uniform Column Correction**: Calculates the mean albedo of every
+    column and subtracts the difference of this value and the average column
+    mean from each column. The result is that the column means become roughly
+    uniform.
+    """
+
+    def __init__(
+        self,
+        method: DestripingMethod,
+        name: str = "destriped",
+        enabled: bool = True,
+        save_output: bool = False,
+    ) -> None:
+        super().__init__(name, enabled, save_output)
+        self.method: DestripingMethod = method
+
+    def run(self, state: PipelineState) -> PipelineState:
+        return destripe.modify_state(state, self.method)
+
+    def save(self, output: PipelineState) -> None:
+        destripe.write_to_cache(self._time(), output, self.cache, self.method)
 
 
 class Crop(Step):

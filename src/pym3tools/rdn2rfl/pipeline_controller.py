@@ -1,20 +1,20 @@
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
-from cubio import cubedata_from_json_file
 import h5py
 import numpy as np
-from pyresample.geometry import SwathDefinition, AreaDefinition
+from cubio import cube_from_json
+from pyresample.geometry import AreaDefinition, SwathDefinition
 
-from pym3tools.data_retrieval.data_directory import M3DataPaths
-from pym3tools.save_models.pipeline_cache_schema import (
-    PipelineCache,
-    PIPELINE_SCHEMA,
-)
-from pym3tools.rdn2rfl.retrieve_terrain_data import load_sphere_geometry_data
 from pym3tools.constants import MOON_GCS_PRJ
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.rdn2rfl.retrieve_terrain_data import load_sphere_geometry_data
+from pym3tools.save_models.pipeline_cache_schema import (
+    PIPELINE_SCHEMA,
+    PipelineCache,
+)
 
-from .step_model import Step, PipelineState
+from .step_model import PipelineState, Step
 
 
 class M3Level2Pipeline:
@@ -56,11 +56,11 @@ class M3Level2Pipeline:
 
         # ---- Loading Data -----
         # Radiance
-        rdn_ctxt, rdn_data = cubedata_from_json_file(self.catalog.rdn.json)
+        rdn_ctxt, rdn_data = cube_from_json(self.catalog.rdn.json)
         rdn_data.transpose_to("BIP")
 
         # Location
-        _, loc_cube = cubedata_from_json_file(self.catalog.loc.json)
+        _, loc_cube = cube_from_json(self.catalog.loc.json)
         loc_cube.transpose_to("BIP")
         longitudes = np.array(loc_cube.array.values[:, :, 0])
         longitudes = ((longitudes + 180) % 360) - 180  # -180 -> 180
@@ -71,9 +71,7 @@ class M3Level2Pipeline:
         m3geom.convert_to_radians()
 
         # ---- Initializing State ----
-        self.state = PipelineState(
-            rdn_data.array, rdn_ctxt.measurement_values, m3geom
-        )
+        self.state = PipelineState(rdn_data.array, rdn_ctxt.measurement_values, m3geom)
 
         # ---- Setting Georeferencing Geometry ----
         self.state.geom.swath = SwathDefinition(
@@ -109,4 +107,3 @@ class M3Level2Pipeline:
 
 def process_m3(config_file: Path) -> None:
     config_file = Path(config_file)
-    return None

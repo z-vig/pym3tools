@@ -61,4 +61,4 @@ def list_by_op(op: OpticalPeriod):
     print(f"{main_string:{filler}^18}")
     for m3id in ALL_M3_PRODUCTS:
         if m3id.op == op:
-            print(m3id.as_string, m3id.image_type)
+            print(m3id.string, m3id.image_type)

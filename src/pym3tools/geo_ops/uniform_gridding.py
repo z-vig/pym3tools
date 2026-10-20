@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import TypeGuard
 
 import numpy as np
-from cubio import cubedata_from_json_file, CubeData
+from cubio import CubeData, cube_from_json
 from cubio.geotools.models import BoundingBoxModel, GeotransformModel
 from pyresample.geometry import AreaDefinition
 from pyresample.kd_tree import resample_nearest
@@ -16,9 +16,8 @@ from .data_transfer_classes import ResampledList
 def read_json_list(fp_list) -> list[CubioTuple]:
     cubio_list: list[CubioTuple] = []
     for i in fp_list:
-        cc, cd = cubedata_from_json_file(i)
+        cc, cd = cube_from_json(i)
         cd.transpose_to("BIP")
-        cd.set_masking(True)
         cd.add_nodata_mask()
         cubio_list.append((cc, cd))
     return cubio_list

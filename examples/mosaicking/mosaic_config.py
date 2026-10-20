@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Self
 
 from pydantic import BaseModel
+
 from pym3tools.types import MosaicMethod
 
 

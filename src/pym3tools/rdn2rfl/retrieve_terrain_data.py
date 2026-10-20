@@ -1,17 +1,15 @@
 from dataclasses import dataclass
-from typing import TypeVar, Generic, TypedDict
 from pathlib import Path
+from typing import TypedDict
 
-from cubio import cubedata_from_json_file
 import numpy as np
 import xarray as xr
+from cubio import cube_from_json
 
-from pym3tools.data_retrieval import M3DataPaths
 from pym3tools.constants import DEG2RAD
+from pym3tools.data_retrieval import M3DataPaths
+
 from .data_transfer_classes import GeoreferencingGeometry
-
-
-A = TypeVar("A", bound=np.ndarray | xr.DataArray)
 
 
 class ArrayShape(TypedDict):
@@ -21,7 +19,7 @@ class ArrayShape(TypedDict):
 
 
 @dataclass
-class M3Geometry(Generic[A]):
+class M3Geometry[A: np.ndarray | xr.DataArray]:
     solaz: A
     solze: A
     m3azi: A
@@ -164,7 +162,7 @@ def xarray_m3geom_to_numpy(
 def load_sphere_geometry_data(
     catalog: M3DataPaths, georef_geom: GeoreferencingGeometry | None = None
 ) -> M3Geometry[np.ndarray]:
-    _, obs_cube = cubedata_from_json_file(catalog.obs.json)
+    _, obs_cube = cube_from_json(catalog.obs.json)
     obs_cube.transpose_to("BIP")
     solar_azimuth = obs_cube.array[:, :, 0]
     solar_zenith = obs_cube.array[:, :, 1]
@@ -190,13 +188,10 @@ def replace_terrain(
     slope_json_path: Path | str,
     aspect_json_path: Path | str,
 ) -> M3Geometry[np.ndarray]:
-    _, new_slp = cubedata_from_json_file(slope_json_path)
-    _, new_asp = cubedata_from_json_file(aspect_json_path)
+    _, new_slp = cube_from_json(slope_json_path)
+    _, new_asp = cube_from_json(aspect_json_path)
     new_slp.transpose_to("BIP")
     new_asp.transpose_to("BIP")
-
-    new_slp.set_masking(True)
-    new_asp.set_masking(True)
 
     new_slp.add_nodata_mask()
     new_asp.add_nodata_mask()

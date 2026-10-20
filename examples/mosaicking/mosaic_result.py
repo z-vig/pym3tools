@@ -2,7 +2,7 @@
 from pathlib import Path
 from pym3tools.geo_ops import mosaic_arrays
 from pym3tools.geo_ops.data_transfer_classes import ResampledMosaic
-from cubio import cubedata_from_json_file, cube_from_numpy, write_envi
+from cubio import cube_from_json, cube_from_numpy, write_envi
 from mosaic_config import MosaicConfig
 
 
@@ -19,7 +19,7 @@ def mosaic_from_config(config_fp: str | Path):
     }
 
     for name, (mosaic, sample) in mosaic_dict.items():
-        sample_cc, _ = cubedata_from_json_file(sample)
+        sample_cc, _ = cube_from_json(sample)
         mosaic_cc, mosaic_cd = cube_from_numpy(
             mosaic.data,
             name,

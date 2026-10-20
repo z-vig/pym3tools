@@ -1,11 +1,11 @@
-from pym3tools.save_models.export_cache_product import cache_to_cubio
-from pym3tools.save_models.pipeline_cache_schema import PipelineCache
-from pym3tools.m3catalog import DataIDString
-from pym3tools.m3catalog import M3DataID
-
-# from cubio import write_envi  # , write_zarr
+from pathlib import Path
 
 import h5py
+from cubio import CubeContext, CubeData, write_envi
+
+from pym3tools.m3catalog import DataIDString, M3DataID
+from pym3tools.save_models.export_cache_product import cache_to_cubio
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 
 sample_ids: list[DataIDString] = [
     "M3T20090418T020644",
@@ -17,23 +17,40 @@ sample_ids: list[DataIDString] = [
 
 
 for id in sample_ids:
-
-    cache_fp = f"D:/moon_data/m3/Gruithuisen_Region/{id}/pipeline_cache.hdf5"
-    savename = f"{id}_PHOTOMETRY"
+    if id.find("M3G") > -1:
+        continue
+    cache_fp = Path(
+        f"D:/moon_data/m3/Gruithuisen_Region/{id}/pipeline_cache.hdf5"
+    )
+    products_directory = cache_fp.parent / "products"
+    if not products_directory.exists():
+        products_directory.mkdir()
 
     m3id = M3DataID.from_string(id)
     print(m3id.string, m3id.op)
 
-    # with h5py.File(cache_fp) as f:
-    #     cache = PipelineCache(f)
-    #     ctxt, cub = cache_to_cubio(
-    #         cache.photometric_corrected.photometry_backplane, savename
-    #     )
+    items_to_save: list[tuple[CubeContext, CubeData]] = []
+    with h5py.File(str(cache_fp)) as f:
+        cache = PipelineCache(f)
 
-    # write_zarr(ctxt, cub, f"D:/moon_data/m3/Gruithuisen_Region/{savename}")
-    # write_envi(
-    #     ctxt,
-    #     cub,
-    #     "BIL",
-    #     "D:/moon_data/m3/Gruithuisen_Region/mosaic_components_photometry/_",
-    # )
+        items_to_save.append(
+            cache_to_cubio(
+                cache.photometric_corrected.photometry_backplane, f"{id}_photo"
+            )
+        )
+
+        items_to_save.append(
+            cache_to_cubio(cache.photometric_corrected.cube, f"{id}_rfl")
+        )
+
+        items_to_save.append(
+            cache_to_cubio(cache.georeferenced.obs, f"{id}_obs")
+        )
+
+    for ctxt, cub in items_to_save:
+        write_envi(
+            ctxt,
+            cub,
+            "BIL",
+            products_directory,
+        )

@@ -1,32 +1,31 @@
 from dataclasses import dataclass
-from typing import ClassVar, Self
 from pathlib import Path
+from typing import ClassVar, Self
 
-from pym3tools.rdn2rfl.pipeline_state import (
-    PipelineState,
-    CompletedFlag,
-    get_standard_dset_attrs,
-)
-from pym3tools.constants import MOON_RADIUS
-from pym3tools.save_models.pipeline_cache_schema import PipelineCache
-from pym3tools.data_retrieval.data_directory import M3DataPaths
-from pym3tools.rdn2rfl.retrieve_terrain_data import (
-    resample_m3geom,
-    replace_terrain,
-    # crop_m3geom,
-)
-
-from cubio import cubedata_from_json_file
+import numpy as np
+import xarray as xr
+from cubio import cube_from_json
+from cubio.geotools.generate_geoloc_backplane import latlong_from_gcp_group
 from cubio.geotools.models import (
     BoundingBoxModel,
     GCPGroup,
     GeotransformModel,
     PointModel,
 )
-from cubio.geotools.generate_geoloc_backplane import latlong_from_gcp_group
-from pyresample.geometry import SwathDefinition, AreaDefinition
-import numpy as np
-import xarray as xr
+from pyresample.geometry import AreaDefinition, SwathDefinition
+
+from pym3tools.constants import MOON_RADIUS
+from pym3tools.data_retrieval.data_directory import M3DataPaths
+from pym3tools.rdn2rfl.pipeline_state import (
+    CompletedFlag,
+    PipelineState,
+    get_standard_dset_attrs,
+)
+from pym3tools.rdn2rfl.retrieve_terrain_data import (  # crop_m3geom,
+    replace_terrain,
+    resample_m3geom,
+)
+from pym3tools.save_models.pipeline_cache_schema import PipelineCache
 
 
 @dataclass
@@ -118,7 +117,7 @@ def retrieve_latlong(
         longitudes, latitudes, xs, ys = loc_from_gcp(gcps, state.data)
     else:
         print("From PDS...")
-        _, loc_cube = cubedata_from_json_file(catalog.loc.json)
+        _, loc_cube = cube_from_json(catalog.loc.json)
         loc_cube.transpose_to("BIP")
         longitudes = np.array(loc_cube.array.values[:, :, 0])
         longitudes = ((longitudes + 180) % 360) - 180

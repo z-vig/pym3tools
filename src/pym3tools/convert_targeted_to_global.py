@@ -35,6 +35,21 @@ def dynamic_index(
     return tuple(slc)
 
 
+def filter_1d_slice(
+    data: np.ndarray, filter_width: int, add_offset: bool = True
+):
+    filter_offset = -filter_width // 2
+    if not add_offset:
+        filter_offset = 0
+    filtered_arr = uniform_filter1d(
+        data,
+        filter_width,
+        mode="nearest",
+        origin=filter_offset,
+    )
+    return filtered_arr
+
+
 def filter_cube_slice(
     cube: np.ndarray,
     z_axis: int,
@@ -164,3 +179,22 @@ def targeted_to_global_spectral(
         global_position += lngth
 
     return global_array
+
+
+def targeted_to_global_wavelengths(
+    targeted_wavelengths: np.ndarray | list[float],
+) -> list[float]:
+    trgwvl = np.array(targeted_wavelengths)
+    position = 0
+    glb_wvl_recreation = np.zeros(N_GLOBAL_CHANNELS)
+    for slc, resamp in GLOBAL_RESAMPLING.items():
+        piece = trgwvl[slc]
+        newslc, length = slice_target_to_global(slc, resamp, position)
+        position += length
+        filtered = filter_1d_slice(piece, resamp)
+        downsamp_slice = slice(0, slc.stop, resamp)
+        glb_wvl_recreation[newslc] = filtered[downsamp_slice]
+
+    return list(glb_wvl_recreation)
+
+def targeted_to_global_spatial()

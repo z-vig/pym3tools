@@ -1,10 +1,11 @@
-from typing import Literal, TypeAlias, TypeGuard, Any
+from typing import Any, Literal, TypeGuard
+
 from cubio import CubeContext, CubeData
 
-DataLevel: TypeAlias = Literal["L0", "L1B", "L2"]
+type DataLevel = Literal["L0", "L1B", "L2"]
 
 
-AcquisitionMode: TypeAlias = Literal["Global", "Target"]
+type AcquisitionMode = Literal["Global", "Target"]
 acquisition_modes: list[AcquisitionMode] = ["Global", "Target"]
 acq_char_to_mode: dict[str, AcquisitionMode] = {
     "G": "Global",
@@ -19,7 +20,7 @@ def is_valid_acquisition_mode(val: str) -> TypeGuard[AcquisitionMode]:
     return val in acquisition_modes
 
 
-M3ImageType: TypeAlias = Literal["RDN", "RFL", "LOC", "OBS", "L0"]
+type M3ImageType = Literal["RDN", "RFL", "LOC", "OBS", "L0"]
 m3_image_types: list[M3ImageType] = ["RDN", "RFL", "LOC", "OBS", "L0"]
 
 
@@ -27,7 +28,7 @@ def is_valid_m3_image_type(val: str) -> TypeGuard[M3ImageType]:
     return val in m3_image_types
 
 
-M3CalType: TypeAlias = Literal[
+type M3CalType = Literal[
     "SOLAR_SPECTRUM",
     "STATISTICAL_POLISH",
     "GROUND_TRUTH",
@@ -40,9 +41,9 @@ m3_cal_types: list[M3CalType] = [
     "PHASE_ANGLE_CORRECTION",
 ]
 
-OpticalPeriod: TypeAlias = Literal["OP1A", "OP1B", "OP2A", "OP2B", "OP2C"]
+type OpticalPeriod = Literal["OP1A", "OP1B", "OP2A", "OP2B", "OP2C"]
 
-DatasetStatus: TypeAlias = Literal["NotSet", "Set"]
+type DatasetStatus = Literal["NotSet", "Set"]
 
 """
 Thermal Correction Methods
@@ -55,14 +56,14 @@ Shkuratov = Uses the Shkuratov et al., XXXX method.
 Wohler_Grumpe = Uses the Wohler and Grumpe, 2022 method that fits a linear
     model to samples from the Apollo Collection.
 """
-ThermalCorrectionMethod: TypeAlias = Literal[
+type ThermalCorrectionMethod = Literal[
     "Clark", "Clark_Modified", "Li_Milliken", "Shkuratov", "Wohler_Grumpe"
 ]
 
 
-TopoCorrectionMethod: TypeAlias = Literal["Lommel-Seeliger", "Lunar Lambert"]
+type TopoCorrectionMethod = Literal["Lommel-Seeliger", "Lunar Lambert"]
 
-CubioTuple: TypeAlias = tuple[CubeContext, CubeData]
+type CubioTuple = tuple[CubeContext, CubeData]
 
 
 def is_cubio_tuple(val: Any) -> TypeGuard[CubioTuple]:
@@ -74,4 +75,6 @@ def is_cubio_tuple(val: Any) -> TypeGuard[CubioTuple]:
     )
 
 
-MosaicMethod: TypeAlias = Literal["Mean", "MinimumIncidenceAngle", "MaxAlbedo"]
+type MosaicMethod = Literal["Mean", "MinimumIncidenceAngle", "MaxAlbedo"]
+
+type DestripingMethod = Literal["UniformColumnMean", "GaussianFilter"]

@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
-from typing import Self, TypeVar, Generic
+from typing import Self
 
-from cubio.geotools.models import BoundingBoxModel
-from pyresample.geometry import SwathDefinition, AreaDefinition
-from pyresample import kd_tree
 import numpy as np
 import xarray as xr
+from cubio.geotools.models import BoundingBoxModel
+from pyresample import kd_tree
+from pyresample.geometry import AreaDefinition, SwathDefinition
 
 MOON_RADIUS = 1737400
 
@@ -142,7 +142,7 @@ class GeoreferencingGeometry:
             fill_value=np.nan,  # type: ignore
         )
         if not isinstance(resamp, np.ndarray):
-            raise RuntimeError("Invalid resampling return type.")
+            raise TypeError("Invalid resampling return type.")
         return resamp
 
     def gridded_data_to_swath(
@@ -164,11 +164,8 @@ class GeoreferencingGeometry:
         )
 
 
-ARR = TypeVar("ARR", bound=np.ndarray | xr.DataArray)
-
-
 @dataclass
-class CropResult(Generic[ARR]):
+class CropResult[ARR: np.ndarray | xr.DataArray]:
     cropped_data: ARR
     longitudes: ARR
     latitudes: ARR

@@ -1,9 +1,9 @@
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Self
 from warnings import warn
 
-from pym3tools.m3catalog import DataIDString, is_valid_data_id, M3DataID
+from pym3tools.m3catalog import DataIDString, M3DataID, is_valid_data_id
 
 
 def init_data_dir(
