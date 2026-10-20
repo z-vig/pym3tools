@@ -27,7 +27,7 @@
 
 ### Installation
 
-`pym3tools` is currently only available through PyPI.
+`pym3tools` is currently only available through PyPI (pip).
 ```bash
 pip install pym3tools
 ```
