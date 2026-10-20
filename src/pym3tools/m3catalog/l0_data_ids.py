@@ -1,7 +1,6 @@
-from typing import Literal, TypeAlias
+from typing import Literal
 
-
-L0DataIDString: TypeAlias = Literal[
+type L0DataIDString = Literal[
     "M3G20081118T222604",
     "M3G20081118T223204",
     "M3G20081119T021501",

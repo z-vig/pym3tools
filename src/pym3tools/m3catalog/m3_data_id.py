@@ -1,15 +1,15 @@
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Self
-import re
 
 from pym3tools.types import (
     AcquisitionMode,
+    M3ImageType,
+    OpticalPeriod,
     acq_char_to_mode,
     acq_mode_to_char,
-    M3ImageType,
     is_valid_m3_image_type,
-    OpticalPeriod,
 )
 
 from .data_ids import DataIDString, is_valid_data_id
@@ -51,14 +51,13 @@ class M3DataID:
         version = result.get("version")
 
         if not isinstance(acq_mode, str):
-            raise ValueError("Invalid Data ID 1")
+            raise TypeError("Invalid Data ID 1")
         acq_mode = acq_char_to_mode.get(acq_mode)
         if acq_mode is None:
             raise ValueError("Invalid Data ID 2")
 
-        if img_type is not None:
-            if not is_valid_m3_image_type(img_type):
-                raise ValueError("Invalid Data ID 3")
+        if (img_type is not None) and (not is_valid_m3_image_type(img_type)):
+            raise ValueError("Invalid Data ID 3")
 
         acq_dt = datetime(
             int(result["year"]),
@@ -103,38 +102,17 @@ class M3DataID:
 
     @property
     def op(self) -> OpticalPeriod:
-        if (
-            datetime(2008, 10, 18)
-            < self.acquisition_datetime
-            <= datetime(2009, 1, 9)
-        ):
+        if datetime(2008, 10, 18) < self.acquisition_datetime <= datetime(2009, 1, 9):
             return "OP1A"
-        elif (
-            datetime(2009, 1, 9)
-            < self.acquisition_datetime
-            <= datetime(2009, 2, 15)
-        ):
+        elif datetime(2009, 1, 9) < self.acquisition_datetime <= datetime(2009, 2, 15):
             return "OP1B"
-        elif (
-            datetime(2009, 4, 15)
-            < self.acquisition_datetime
-            <= datetime(2009, 4, 28)
-        ):
+        elif datetime(2009, 4, 15) < self.acquisition_datetime <= datetime(2009, 4, 28):
             return "OP2A"
-        elif (
-            datetime(2009, 5, 13)
-            < self.acquisition_datetime
-            <= datetime(2009, 5, 17)
-        ):
+        elif datetime(2009, 5, 13) < self.acquisition_datetime <= datetime(2009, 5, 17):
             return "OP2B"
-        elif (
-            datetime(2009, 5, 20)
-            < self.acquisition_datetime
-            <= datetime(2009, 8, 17)
-        ):
+        elif datetime(2009, 5, 20) < self.acquisition_datetime <= datetime(2009, 8, 17):
             return "OP2C"
 
         raise ValueError(
-            f"{self.acquisition_datetime} is not in the acceptable mission "
-            "time range."
+            f"{self.acquisition_datetime} is not in the acceptable mission time range."
         )

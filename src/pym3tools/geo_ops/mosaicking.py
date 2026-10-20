@@ -1,12 +1,13 @@
 from collections.abc import Callable
-from typing import Concatenate
 from pathlib import Path
+from typing import Concatenate
 
 import numpy as np
 
-from pym3tools.types import MosaicMethod, CubioTuple
-from .uniform_gridding import resample_to_super_grid
+from pym3tools.types import CubioTuple, MosaicMethod
+
 from .data_transfer_classes import ResampledMosaic
+from .uniform_gridding import resample_to_super_grid
 
 
 def key_reducer(stack: np.ndarray, key: np.ndarray) -> np.ndarray:
@@ -60,9 +61,7 @@ def mosaic_from_aligned_grids(
 def mosaic_arrays(
     input_list: list[str] | list[Path] | list[CubioTuple],
     method: MosaicMethod,
-    incidence_angle_list: (
-        list[Path] | list[str] | list[CubioTuple] | None
-    ) = None,
+    incidence_angle_list: (list[Path] | list[str] | list[CubioTuple] | None) = None,
     photometry_cube: bool = False,
 ) -> ResampledMosaic:
     aligned_list = resample_to_super_grid(input_list)

@@ -1,7 +1,6 @@
-from typing import Literal, TypeAlias, TypeGuard
+from typing import Literal, TypeGuard
 
-
-DataIDString: TypeAlias = Literal[
+type DataIDString = Literal[
     "M3G20081118T222604",
     "M3G20081118T223204",
     "M3G20081119T021733",

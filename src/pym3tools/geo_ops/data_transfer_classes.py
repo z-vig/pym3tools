@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import numpy as np
-from cubio.geotools.models import GeotransformModel, BoundingBoxModel
+from cubio.geotools.models import BoundingBoxModel, GeotransformModel
 
 
 @dataclass

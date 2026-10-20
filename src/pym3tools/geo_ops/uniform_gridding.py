@@ -155,8 +155,8 @@ def resample_to_super_grid(
             dat,
             total_area,
             roi,
-            epsilon=0.5,  # type: ignore
-            fill_value=np.nan,  # type: ignore
+            epsilon=0.5,
+            fill_value=np.nan,
         )
         resampled_list.append(resamp)
 

@@ -56,6 +56,9 @@ ALL_M3_PRODUCTS = [M3DataID.from_string(i) for i in all_m3_products_str]
 
 
 def list_by_op(op: OpticalPeriod):
+    """
+    Lists all M3 data products given an optical period.
+    """
     filler = "="
     main_string = f"{op} Products"
     print(f"{main_string:{filler}^18}")

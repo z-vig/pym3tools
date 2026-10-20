@@ -1,6 +1,7 @@
-# 🛰️ **pym3tools**
+`pym3tools`
+---
 
-  >*A modern standardized toolkit for processing Moon Mineralogy Mapper (M<sup>3</sup>) Data in Python.*
+  >*A modern standardized toolkit for processing Moon Mineralogy Mapper (M<sup>3</sup>) Data in a pure Python 3.13 environment.*
 
 ---
 
@@ -14,14 +15,15 @@
 
 | Module| Description |
 |-------------|--------------|
-|ℹ️`io`| Provides easy-to-use and flexible input/output functions for **reading and writing** M<sup>3</sup> raster data |
-|📬`file_downloader`    | Allows the user to **download files** from NASA's planetary data system (PDS) into a user-friendly format in the form of a file manager class. |
-|⚙️`level2pipeline`   | Contains the main logic and computional functions for processing level 1v3 (**Radiance**) M<sup>3</sup> data **into** level 2 (**Reflectance**) data|
-|🌗 `selenography`     | Wraps `gdal` and `rasterio` to provide **geospatial utilities tailored for use on the Moon**, including built-in lunar coordinate systems |
+|`data_retrieval`| Provides utilities for **downloading** M<sup>3</sup> data and placing it into user-friendly data structures|
+|`m3catalog`| Lays the framework for data structures that are compatible with **M<sup>3</sup> metadata**.
+|`geo_ops`| Geographic operations such as **georeferencing**. |
+|`rfl2rfl`| Contains the main logic and computational functions for processing level 1 (**Radiance**) M<sup>3</sup> data **into** level 2 (**Reflectance**) data|
+|`save_models`| Provides the framework for saving steps of the `rdn2rfl` pipeline to easy-to-use HDF5 files.|
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 

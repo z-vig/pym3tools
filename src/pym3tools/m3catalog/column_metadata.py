@@ -1,8 +1,8 @@
+import re
 from dataclasses import dataclass
-from typing import Self, Union, TypedDict
 from importlib.resources import files
 from importlib.resources.abc import Traversable
-import re
+from typing import Self, TypedDict
 
 import numpy as np
 
@@ -23,7 +23,7 @@ class ColumnMetadataConstructor(TypedDict):
 
 def _parse_index_label(
     idx_file: Traversable,
-    column_name: Union[L0ColumnName, L1BColumnName, L2ColumnName],
+    column_name: L0ColumnName | L1BColumnName | L2ColumnName,
 ) -> ColumnMetadataConstructor:
     column_entry_pattern = re.compile(
         r"COLUMN_NUMBER\s+=\s(\d+)\s+\n"
@@ -93,7 +93,7 @@ class ColumnMetadata:
     @classmethod
     def _from_index(
         cls,
-        col_name: Union[L0ColumnName, L1BColumnName, L2ColumnName],
+        col_name: L0ColumnName | L1BColumnName | L2ColumnName,
         index_name: str,
     ) -> Self:
         """Create ColumnMetadata from an index file."""
@@ -154,10 +154,8 @@ class ColumnMetadata:
     def entries(self) -> np.ndarray:
         all_entries = []
         with open(str(self.tab_file)) as f:
-            for index_line in f.readlines():
-                col_slice = slice(
-                    self.start_byte, self.start_byte + self.nbytes
-                )
+            for index_line in f:
+                col_slice = slice(self.start_byte, self.start_byte + self.nbytes)
                 col_entry = index_line[col_slice].replace(" ", "")
                 all_entries.append(col_entry)
         return np.array(all_entries)

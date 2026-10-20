@@ -1,7 +1,6 @@
 from typing import overload
-from pym3tools.m3catalog import DataIDString
-from pym3tools.m3catalog import ColumnMetadata
-from pym3tools.m3catalog import M3DataID
+
+from pym3tools.m3catalog import ColumnMetadata, DataIDString, M3DataID
 from pym3tools.m3catalog.l0_columns_names import L0ColumnName
 from pym3tools.m3catalog.l1b_columns_names import L1BColumnName
 from pym3tools.m3catalog.l2_columns_names import L2ColumnName
@@ -38,9 +37,7 @@ def _get_metadata(
 
 
 @overload
-def get_l0_metadata(
-    data_id: DataIDString, column_name: L0ColumnName
-) -> str: ...
+def get_l0_metadata(data_id: DataIDString, column_name: L0ColumnName) -> str: ...
 
 
 @overload
@@ -69,9 +66,7 @@ def get_l0_metadata(
 
 
 @overload
-def get_l1_metadata(
-    data_id: DataIDString, column_name: L1BColumnName
-) -> str: ...
+def get_l1_metadata(data_id: DataIDString, column_name: L1BColumnName) -> str: ...
 
 
 @overload
@@ -94,9 +89,7 @@ def get_l1_metadata(
 
 
 @overload
-def get_l2_metadata(
-    data_id: DataIDString, column_name: L2ColumnName
-) -> str: ...
+def get_l2_metadata(data_id: DataIDString, column_name: L2ColumnName) -> str: ...
 
 
 @overload
@@ -109,11 +102,7 @@ def get_l2_metadata(
     data_id: DataIDString | list[DataIDString], column_name: L2ColumnName
 ) -> str | list[str]:
     id_col = ColumnMetadata.from_l2("PRODUCT_ID").entries
-    test = ColumnMetadata.from_l2(column_name)
-    print(test.name, test.start_byte, test.nbytes)
     target_col = ColumnMetadata.from_l2(column_name).entries
-    if column_name == "CH1:GLOBAL_BANDPASS_FILE_NAME":
-        print(target_col)
     result = _get_metadata(id_col.tolist(), data_id, target_col.tolist())
     if result is not None:
         return result

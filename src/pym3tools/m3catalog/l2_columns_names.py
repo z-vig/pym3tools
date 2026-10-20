@@ -1,7 +1,6 @@
-from typing import Literal, TypeAlias
+from typing import Literal
 
-
-L2ColumnName: TypeAlias = Literal[
+type L2ColumnName = Literal[
     "VOLUME_ID",
     "DATA_SET_ID",
     "PRODUCT_ID",
