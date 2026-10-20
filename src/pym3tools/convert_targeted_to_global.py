@@ -26,18 +26,14 @@ def dynamic_slice(a: np.ndarray, axis: int, slc: slice) -> np.ndarray:
     return a[(slice(None),) * (axis % a.ndim) + (slc,)]
 
 
-def dynamic_index(
-    a: np.ndarray, axis: int, idx: int
-) -> tuple[slice | int, ...]:
+def dynamic_index(a: np.ndarray, axis: int, idx: int) -> tuple[slice | int, ...]:
     """Used for dynamic axis array indexing."""
     slc: list[slice | int] = [slice(None)] * a.ndim
     slc[axis] = idx
     return tuple(slc)
 
 
-def filter_1d_slice(
-    data: np.ndarray, filter_width: int, add_offset: bool = True
-):
+def filter_1d_slice(data: np.ndarray, filter_width: int, add_offset: bool = True):
     filter_offset = -filter_width // 2
     if not add_offset:
         filter_offset = 0
@@ -196,5 +192,3 @@ def targeted_to_global_wavelengths(
         glb_wvl_recreation[newslc] = filtered[downsamp_slice]
 
     return list(glb_wvl_recreation)
-
-def targeted_to_global_spatial()

@@ -1,8 +1,7 @@
 [project]
 name = "pym3tools"
 version = "0.1.0"
-description = """Data utilities for processing Moon Mineralogy Mapper Data from
-the NASA Planetary Data System."""
+description = """Data utilities for processing Moon Mineralogy Mapper Data from the NASA Planetary Data System."""
 authors = [
     {name = "Z.M. Vig",email = "zvig@umd.edu"}
 ]
@@ -13,7 +12,6 @@ requires-python = ">=3.13, <3.14"
 dependencies = [
     "numpy >=2.3.2,<3.0.0",
     "psutil >=7.0.0,<8.0.0",
-    "matplotlib >=3.10.5,<4.0.0",
     "requests >=2.32.4,<3.0.0",
     "tqdm >=4.67.1,<5.0.0",
     "h5py >=3.14.0,<4.0.0",
@@ -23,8 +21,8 @@ dependencies = [
     "scipy >=1.16.1,<2.0.0",
     "scipy-stubs >=1.16.1.1,<2.0.0.0",
     "types-pyyaml >=6.0.12.20250822,<7.0.0.0",
-    "cubio @ file:///C:/Users/zvig/python_code/package_production/cubio",
-    "h5py-stubs (>=0.1.2,<0.2.0)"
+    "h5py-stubs (>=0.1.2,<0.2.0)",
+    "cubio>=0.1.4",
 ]
 
 include = [
@@ -42,8 +40,11 @@ include = [
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.13.3"]
+build-backend = "uv_build"
 
-[tool.poetry.dependencies]
-cubio = {develop = true}
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "twine>=7.0.0",
+]

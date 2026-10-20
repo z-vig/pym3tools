@@ -16,9 +16,9 @@
 | Module| Description |
 |-------------|--------------|
 |`data_retrieval`| Provides utilities for **downloading** M<sup>3</sup> data and placing it into user-friendly data structures|
-|`m3catalog`| Lays the framework for data structures that are compatible with **M<sup>3</sup> metadata**.
+|`m3catalog`| Lays the framework for data structures that are compatible with **M<sup>3</sup> metadata**.|
 |`geo_ops`| Geographic operations such as **georeferencing**. |
-|`rfl2rfl`| Contains the main logic and computational functions for processing level 1 (**Radiance**) M<sup>3</sup> data **into** level 2 (**Reflectance**) data|
+|`rfl2rfl`| Contains the main logic and computational functions for processing level 1 (**Radiance**) M<sup>3</sup> data **into** level 2 (**Reflectance**) data.|
 |`save_models`| Provides the framework for saving steps of the `rdn2rfl` pipeline to easy-to-use HDF5 files.|
 
 ---
