@@ -2,6 +2,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Concatenate
 
+import cubio as cb
 import numpy as np
 
 from pym3tools.types import CubioTuple, MosaicMethod
@@ -79,3 +80,49 @@ def mosaic_arrays(
     return ResampledMosaic(
         mosaic, aligned_list.gtrans, aligned_list.bounds, aligned_list.crs
     )
+
+
+def mosaic_from_filepaths(
+    photo_fp_list: list[Path],
+    rfl_fp_list: list[Path],
+    mosaic_name: str,
+    output_directory: Path,
+) -> None:
+    """
+    Creates and saves mosaics for M3 image files.
+
+    Parameters
+    ----------
+    photo_fp_list: list[Path]
+        List of filepaths to photometry backplane images
+    rfl_fp_list: list[Path]
+        List of filepaths to reflectance cubes, same ordering as photo_fp_list
+    mosaic_name: str
+        Name of the output mosaic
+    output_directory: Path
+        Directory location to save the mosaic
+    """
+    if not output_directory.is_dir():
+        output_directory.mkdir(parents=True, exist_ok=True)
+
+    rfl_mosaic = mosaic_arrays(rfl_fp_list, "Mean", photo_fp_list, photometry_cube=True)
+    inc_mosaic = mosaic_arrays(photo_fp_list, "Mean")
+
+    mosaic_dict: dict[str, tuple[ResampledMosaic, Path]] = {
+        f"{mosaic_name}_RFL": (rfl_mosaic, rfl_fp_list[0]),
+        f"{mosaic_name}_INC": (inc_mosaic, photo_fp_list[0]),
+    }
+
+    for name, (mosaic, sample) in mosaic_dict.items():
+        sample_cc, _ = cb.cube_from_json(sample)
+        mosaic_cc, mosaic_cd = cb.cube_from_numpy(
+            mosaic.data,
+            "BIP",
+            name=name,
+            crs=mosaic.crs,
+            gtrans=mosaic.gtrans,
+            measvals=sample_cc.measurement_values,
+            bandlbls=sample_cc.band_names,
+        )
+
+        cb.write_envi(mosaic_cc, mosaic_cd, "BIL", output_directory)

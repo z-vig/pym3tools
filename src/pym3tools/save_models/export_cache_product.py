@@ -5,6 +5,7 @@ import cubio as cb
 import h5py
 from cubio.geotools.models import GeotransformModel
 
+from pym3tools.m3catalog import DataIDString
 from pym3tools.save_models import PipelineCache
 from pym3tools.save_models.attribute_models import StandardDatasetAttrs
 from pym3tools.save_models.pipeline_cache_schema import Dataset
@@ -51,13 +52,16 @@ def cache_to_cubio(
 def save_suite(
     cache_fp: Path | str,
     save_dir: Path | str,
+    m3id: DataIDString,
     format: Literal["BIP", "BSQ", "BIL"] = "BIL",
-):
+) -> None:
+    """
+    Saves suite of image data given a processed .hdf5 pipeline cache.
+    """
     if not Path(save_dir).exists():
-        Path(save_dir).mkdir()
+        Path(save_dir).mkdir(parents=True, exist_ok=True)
     with h5py.File(str(cache_fp)) as f:
         c = PipelineCache(f)
-        m3id = Path(cache_fp).parent.name
         save_dict: dict[str, Dataset[StandardDatasetAttrs]] = {
             f"{m3id}_georef": c.georeferenced.cube,
             f"{m3id}_obs": c.georeferenced.obs,
@@ -67,4 +71,4 @@ def save_suite(
 
         for k, v in save_dict.items():
             ctxt, cub = cache_to_cubio(v, k)
-            cb.write_envi(ctxt, cub, format, Path(save_dir) / "_")
+            cb.write_envi(ctxt, cub, format, Path(save_dir))
