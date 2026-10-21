@@ -110,7 +110,7 @@ def mosaic_from_filepaths(
 
     mosaic_dict: dict[str, tuple[ResampledMosaic, Path]] = {
         f"{mosaic_name}_RFL": (rfl_mosaic, rfl_fp_list[0]),
-        f"{mosaic_name}_INC": (inc_mosaic, photo_fp_list[0]),
+        f"{mosaic_name}_PHOTO": (inc_mosaic, photo_fp_list[0]),
     }
 
     for name, (mosaic, sample) in mosaic_dict.items():
