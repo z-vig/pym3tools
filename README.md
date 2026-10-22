@@ -63,7 +63,7 @@ from pym3tools.level2pipeline import (
 steps = [
     r2r.Georeference(
         enabled=True,
-        gcps_fp="./path_to/ground_control_pionts.gcps",
+        gcps_fp="./path_to/ground_control_points.gcps",
         custom_slope="./path_to/slope_data.bil",
         custom_aspect="./path_to/aspect_data.bil"
     ),
