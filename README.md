@@ -20,7 +20,6 @@
 |`geo_ops`| Geographic operations such as **georeferencing**. |
 |`rfl2rfl`| Contains the main logic and computational functions for processing level 1 (**Radiance**) M<sup>3</sup> data **into** level 2 (**Reflectance**) data.|
 |`save_models`| Provides the framework for saving steps of the `rdn2rfl` pipeline to easy-to-use HDF5 files.|
-
 ---
 
 ## Quick Start
@@ -35,6 +34,7 @@ pip install pym3tools
 ### File Retrieval from PDS
 ```python
 import pym3tools as m3
+from pym3tools.rdn2rfl import pipeline_steps as r2r
 
 # Data covering the Compton Belk'ovich Volcanic Complex
 m3_data_ids = [
@@ -48,10 +48,7 @@ m3_data_ids = [
 # Retrieving Data
 root_dir = "./cbvc_data"
 for i in m3_data_ids:
-    if Path(root_dir, i).exists():
-        _ = m3.M3FileManager(root_dir, i)  # Downloads Data
-    else:
-        m3.file_downloader.create_urls_file(root_dir, i)  # Creates url files
+    m3.data_retrieval.download_m3_dataset(i)  # Creates data directories
 ```
 
 ### Building a Processing Pipeline
@@ -61,28 +58,25 @@ from pym3tools.level2pipeline import (
     Crop, Georeferemce, TerrainModel, SolarSpectrumRemoval, StatisticalPolish,
     Photometric Correction
 )
-from rasterio import BoundingBox
-
-# Initializing File Manager
-root_dir = "./cbvc_data"
-file_manager = m3.M3FileManager(root_dir, "M3G20090531T215442")
-
-# Defining Regional Scope
-bbox = BoundingBox(left=87, bottom=48, right=114, top=71)
 
 # Listing steps of the processing pipeline
 steps = [
-    Crop("cropped", bbox=bbox, save_output=True),
-    Georeference("georeferenced", save_output=True),
-    TerrainModel("terrain_model", save_output=True),
-    SolarSpectrumRemoval("solar_spec_removed", save_output=True),
-    StatisticalPolish("statistical_polish", save_output=True),
-    ClarkThermalCorrection("thermal_correction", use_pds_temperatures=True, save_output=True),
-    PhotometricCorrection("photometric_correction", save_output=True),
+    r2r.Georeference(
+        enabled=True,
+        gcps_fp="./path_to/ground_control_pionts.gcps",
+        custom_slope="./path_to/slope_data.bil",
+        custom_aspect="./path_to/aspect_data.bil"
+    ),
+    r2r.SolarRemoval(enabled=True),
+    r2r.StatisticalPolish(enabled=True),
+    r2r.ThermalCorrection(enabled=True, method="Clark_Modified"),
+    r2r.PhotometricCorrection(enabled=True, method="Lommel-Seeliger"),
 ]
 
 # Initializing pipeline
-pipeline = m3.M3Level2Pipeline(steps, file_manager)
+pipeline = m3.rdn2rfl.M3Level2Pipeline(
+    steps, "path_to/data_directory", "path_to/save_file.hdf5"
+)
 
 # Running pipeline
 pipeline.run()
