@@ -4,7 +4,9 @@
   >*A modern standardized toolkit for processing Moon Mineralogy Mapper (M<sup>3</sup>) Data in a pure Python 3.13 environment.*
 
 ---
-[![Unit Tests](https://github.com/z-vig/pym3tools/actions/workflows/unit_testing.yml/badge.svg)](https://github.com/z-vig/pym3tools/actions/workflows/unit_testing.yml) [![DOI](https://zenodo.org/badge/1028534300.svg)](https://doi.org/10.5281/zenodo.23510051)
+[![Unit Tests](https://github.com/z-vig/pym3tools/actions/workflows/unit_testing.yml/badge.svg)](https://github.com/z-vig/pym3tools/actions/workflows/unit_testing.yml) ![DOI](https://zenodo.org/badge/1028534300.svg)
+
+
 ## What is `pym3tools`?
 
 `pym3tools` is a modular data pipeline designed to make fetching, processing and analyzing M<sup>3</sup> a breeze in Python. `pym3tools` incorporates many different processing methods from current planetary science literature, which allows it to serve as a state-of-the-art, standardized processing method, which will help improve the repeatability of geologic results obtained via M<sup>3</sup>.
